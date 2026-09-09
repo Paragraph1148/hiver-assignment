@@ -5,3 +5,4 @@ data/raw/
 data/interim/
 .env
 .DS_Store
+data/llm_cache.jsonl.tmp
