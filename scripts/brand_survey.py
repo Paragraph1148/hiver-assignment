@@ -17,7 +17,7 @@ RAW = "/home/user/hiver-assignment/data/raw/twcs.csv"
 URL = re.compile(r"https?://\S+")
 
 DEFLECT = re.compile(
-    r"\b(dm|d\.m\.|direct message|private message|priv(?:ate)? msg|pm us|"
+    r"\b(?:dm|d\.m\.|direct message|private message|priv(?:ate)? msg|pm us|"
     r"send us a (?:private )?(?:message|dm)|shoot us a|click .{0,15}message|"
     r"message (?:us|button)|follow (?:us )?(?:and|&) (?:dm|message)|"
     r"follow back|inbox us)\b", re.I)
@@ -28,7 +28,7 @@ DIAGNOSTIC = re.compile(
     r"how long|when did|does (?:this|it) happen|let us know (?:what|if|which))", re.I)
 
 THANKS = re.compile(
-    r"\b(thank(?:s| you)|thx|ty so much|appreciate it|that worked|it works now|"
+    r"\b(?:thank(?:s| you)|thx|ty so much|appreciate it|that worked|it works now|"
     r"fixed it|sorted now|problem solved|you.?re (?:the best|a lifesaver))\b", re.I)
 
 def main():
