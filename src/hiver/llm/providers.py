@@ -188,7 +188,12 @@ class Anthropic(BaseProvider):
 class Gemini(BaseProvider):
     name = "gemini"
     env_key = "GEMINI_API_KEY"
-    default_model = "gemini-2.5-flash"
+    # Pinned, never an alias: `gemini-flash-latest` silently changes model
+    # underneath a recorded cache, which would break replay reproducibility.
+    # Note ListModels advertises models that generateContent then refuses for
+    # new accounts (2.5-flash is one), so this was chosen by probing, not by
+    # reading the model list.
+    default_model = "gemini-3.8-flash"
 
     def default_base_url(self) -> str:
         return "https://generativelanguage.googleapis.com/v1beta"
