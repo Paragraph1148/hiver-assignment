@@ -115,6 +115,8 @@ main{max-width:900px;margin:0 auto;padding:16px 20px 90px}
 .mini{font:inherit;font-size:11.5px;color:var(--muted);background:var(--surface);
   border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
 .mini:hover{border-color:var(--accent);color:var(--ink)}
+.mini:disabled{opacity:.4;cursor:default}
+.mini:disabled:hover{border-color:var(--line);color:var(--muted)}
 .mini[aria-pressed="true"]{border-color:var(--flag);color:var(--flag);font-weight:600}
 #note{flex:1;min-width:200px;font:inherit;font-size:12.5px;background:var(--surface);
   color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
@@ -184,6 +186,7 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
 
     <div class="extras">
       <button class="mini" id="flag" aria-pressed="false">Flag as hard &middot; F</button>
+      <button class="mini" id="clear">Clear this item &middot; 0</button>
       <input id="note" placeholder="Optional note &mdash; why this one was tricky">
       <button class="mini" id="back">&larr; Previous</button>
       <button class="mini" id="skip">Skip &rarr;</button>
@@ -204,6 +207,7 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
   <span><b>A S D</b> auto</span>
   <span><b>Z X C V B N M</b> escalate</span>
   <span><kbd class="lite">&#8592;</kbd> back</span>
+  <span><kbd class="lite">0</kbd> clear</span>
   <span><kbd class="lite">F</kbd> flag</span>
   <span><kbd class="lite">/</kbd> note</span>
   <span class="sp mono" id="save">local only</span>
@@ -236,7 +240,7 @@ const keyToRoute = {};
 AUTO.forEach(o => keyToRoute[o.key] = { route: "auto", reason: o.name });
 ESC.forEach(o => keyToRoute[o.key] = { route: "escalate", reason: o.name });
 
-function render() {
+function render(keepTime) {
   const it = cur();
   if (!it) return finish();
   $("#msg").textContent = it.text;
@@ -254,7 +258,8 @@ function render() {
   }
   $("#flag").setAttribute("aria-pressed", rec && rec.flagged ? "true" : "false");
   $("#note").value = (rec && rec.note) || "";
-  shownAt = Date.now();
+  $("#clear").disabled = !rec;
+  if (!keepTime) shownAt = Date.now();
   stats();
 }
 
@@ -278,17 +283,45 @@ function stats() {
   }
 }
 
-function put(patch) {
+function persist() {
+  try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+}
+
+let advanceTimer = null;
+function cancelAdvance() { clearTimeout(advanceTimer); advanceTimer = null; }
+
+function put(patch, opts) {
+  opts = opts || {};
   const it = cur(); if (!it) return;
   const prev = labels[it.id] || {};
+  const wasComplete = !!(prev.intent && prev.route);
   const rec = Object.assign({ item_id: it.id }, prev, patch);
+  // An explicit null clears the field rather than storing null.
+  Object.keys(patch).forEach(k => { if (patch[k] === null) delete rec[k]; });
   if (!prev.intent && patch.intent) rec.ms = Date.now() - shownAt;
   rec.ts = new Date().toISOString();
   labels[it.id] = rec;
-  try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+  persist();
   save(rec);
+  render(true);
+  // Advance only when this keypress COMPLETED the item. Revisiting a finished
+  // one to correct it must never whisk the annotator away mid-correction.
+  if (!wasComplete && rec.intent && rec.route && !opts.noAdvance) {
+    cancelAdvance();
+    advanceTimer = setTimeout(() => {
+      if (cur() && cur().id === rec.item_id) next();
+    }, 420);
+  }
+}
+
+function clearItem() {
+  const it = cur(); if (!it) return;
+  cancelAdvance();
+  delete labels[it.id];
+  persist();
+  if (db) db.doc("labels/" + it.id).delete().catch(() => {});
+  render(true);
   stats();
-  if (rec.intent && rec.route) setTimeout(() => { if (cur() && cur().id === rec.item_id) next(); }, 260);
 }
 
 let pending = 0;
@@ -323,17 +356,19 @@ document.addEventListener("click", e => {
 });
 
 function apply(key) {
+  cancelAdvance();
+  const it = cur(); if (!it) return;
+  const rec = labels[it.id] || {};
   if (keyToIntent[key] && document.querySelector(`#g-intent .opt[data-key="${key}"]`)) {
-    document.querySelectorAll("#g-intent .opt").forEach(b => b.setAttribute("aria-pressed", "false"));
-    markKey("#g-intent", key);
-    put({ intent: keyToIntent[key] });
+    const same = rec.intent === keyToIntent[key];
+    put({ intent: same ? null : keyToIntent[key] }, { noAdvance: same });
     return;
   }
   const r = keyToRoute[key];
   if (r) {
-    document.querySelectorAll("#g-auto .opt,#g-esc .opt").forEach(b => b.setAttribute("aria-pressed", "false"));
-    markKey(r.route === "auto" ? "#g-auto" : "#g-esc", key);
-    put({ route: r.route, reason: r.reason });
+    const same = rec.route === r.route && rec.reason === r.reason;
+    put(same ? { route: null, reason: null } : { route: r.route, reason: r.reason },
+        { noAdvance: same });
   }
 }
 
@@ -341,8 +376,9 @@ document.addEventListener("keydown", e => {
   if (e.target === $("#note")) { if (e.key === "Enter" || e.key === "Escape") { put({ note: $("#note").value }); $("#note").blur(); } return; }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
-  if (k === "arrowleft" || k === "backspace") { e.preventDefault(); prev(); return; }
-  if (k === "arrowright") { e.preventDefault(); next(); return; }
+  if (k === "arrowleft" || k === "backspace") { e.preventDefault(); cancelAdvance(); prev(); return; }
+  if (k === "arrowright") { e.preventDefault(); cancelAdvance(); next(); return; }
+  if (k === "0") { e.preventDefault(); clearItem(); return; }
   if (k === "/") { e.preventDefault(); $("#note").focus(); return; }
   if (k === "f") { e.preventDefault(); const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
     b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); return; }
@@ -351,8 +387,9 @@ document.addEventListener("keydown", e => {
 
 $("#flag").onclick = () => { const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
   b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); };
-$("#back").onclick = prev;
-$("#skip").onclick = next;
+$("#clear").onclick = clearItem;
+$("#back").onclick = () => { cancelAdvance(); prev(); };
+$("#skip").onclick = () => { cancelAdvance(); next(); };
 $("#note").onblur = () => put({ note: $("#note").value });
 $("#copy").onclick = () => { navigator.clipboard.writeText($("#exp").value)
   .then(() => $("#copy").textContent = "Copied").catch(() => $("#exp").select()); };

@@ -30,12 +30,21 @@ number contaminated by the human having seen the model's answer first.
     1-9              intent
     A S D            auto-handle, with reason
     Z X C V B N M    escalate, with reason
+    0                clear this item back to unlabelled
     F                flag as hard
     /                note
     left arrow       previous item
 
 Two keystrokes finish an item. The physical row encodes the routing decision:
 home row auto-handles, bottom row escalates.
+
+Mistakes are cheap to undo, which matters over 250 items: pressing a different
+key replaces the choice, pressing the SAME key again deselects it, and `0` wipes
+the item back to unlabelled (removing it from the store, not writing a blank
+row). The auto-advance only fires on the keypress that first completes an item -
+returning to a finished item to correct it never moves the page, so a
+correction can't be interrupted halfway. Any navigation key cancels a pending
+advance.
 
 Progress is written to `localStorage` on every keystroke and mirrored to the
 artifact's document store when that is available, so a closed tab loses nothing
