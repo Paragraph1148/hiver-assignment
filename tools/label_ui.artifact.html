@@ -1,0 +1,370 @@
+<title>Golden Set Console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F6F8F9; --surface:#FFFFFF; --raise:#EEF2F4;
+  --ink:#101619; --muted:#5A6B74; --line:#DCE3E7;
+  --accent:#0E7C8B; --accent-soft:#DAEDF0;
+  --auto:#14795A; --auto-soft:#DDF0E7;
+  --esc:#A85A0B; --esc-soft:#FAEBDA;
+  --flag:#A32F2F; --shadow:0 1px 2px rgba(16,22,25,.06),0 4px 14px rgba(16,22,25,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0E1418; --surface:#161E23; --raise:#1D272D;
+  --ink:#E4ECF0; --muted:#8798A2; --line:#243037;
+  --accent:#3FB3C4; --accent-soft:#123038;
+  --auto:#3CBE8C; --auto-soft:#10302561;
+  --esc:#DE8C3E; --esc-soft:#33240F;
+  --flag:#E06B6B; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --ground:#0E1418; --surface:#161E23; --raise:#1D272D;
+  --ink:#E4ECF0; --muted:#8798A2; --line:#243037;
+  --accent:#3FB3C4; --accent-soft:#123038;
+  --auto:#3CBE8C; --auto-soft:#103025;
+  --esc:#DE8C3E; --esc-soft:#33240F;
+  --flag:#E06B6B; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  margin:0;padding-block:0;line-height:1.5}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+
+header{position:sticky;top:0;z-index:10;background:var(--surface);
+  border-bottom:1px solid var(--line)}
+.bar{height:3px;background:var(--raise)}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .18s ease}
+.hrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  padding:10px 20px;max-width:900px;margin:0 auto}
+.brand{font-weight:700;letter-spacing:-.01em;margin-right:auto;font-size:15px}
+.brand span{color:var(--muted);font-weight:500}
+.stat{display:flex;flex-direction:column;line-height:1.2}
+.stat b{font-size:15px;font-weight:600}
+.stat i{font-style:normal;font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em}
+
+main{max-width:900px;margin:0 auto;padding:16px 20px 90px}
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow);padding:18px 24px;margin-bottom:16px}
+.msgmeta{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pill{font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+.msgtext{font-size:19px;line-height:1.5;max-width:62ch;
+  overflow-wrap:break-word;text-wrap:pretty}
+
+.block{margin-bottom:14px}
+.blabel{font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:9px;display:flex;gap:10px;align-items:baseline}
+.blabel em{font-style:normal;color:var(--ink);opacity:.55}
+.grid{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(215px,1fr))}
+.opt{display:flex;gap:9px;align-items:flex-start;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--line);border-radius:7px;
+  padding:7px 10px;cursor:pointer;color:inherit;font:inherit;
+  transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--accent)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt kbd{flex:none;width:19px;height:19px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:4px;background:var(--raise);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  text-transform:uppercase;color:var(--muted)}
+.opt .t{display:block;font-size:12.5px;font-weight:600;line-height:1.3}
+.opt .d{display:block;font-size:10.5px;color:var(--muted);line-height:1.3;margin-top:2px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] kbd{background:var(--accent);color:var(--surface);
+  border-color:var(--accent)}
+.g-auto .opt[aria-pressed="true"]{border-color:var(--auto);background:var(--auto-soft)}
+.g-auto .opt[aria-pressed="true"] kbd{background:var(--auto);border-color:var(--auto)}
+.g-esc .opt[aria-pressed="true"]{border-color:var(--esc);background:var(--esc-soft)}
+.g-esc .opt[aria-pressed="true"] kbd{background:var(--esc);border-color:var(--esc)}
+.route{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.route{grid-template-columns:1fr}}
+.rhead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.rhead.a{color:var(--auto)} .rhead.a .dot{background:var(--auto)}
+.rhead.e{color:var(--esc)} .rhead.e .dot{background:var(--esc)}
+.g-auto,.g-esc{grid-template-columns:1fr}
+
+.extras{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.mini{font:inherit;font-size:11.5px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+.mini:hover{border-color:var(--accent);color:var(--ink)}
+.mini[aria-pressed="true"]{border-color:var(--flag);color:var(--flag);font-weight:600}
+#note{flex:1;min-width:200px;font:inherit;font-size:12.5px;background:var(--surface);
+  color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+#note:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);
+  border-top:1px solid var(--line);padding:8px 20px;font-size:11px;color:var(--muted)}
+.frow{max-width:900px;margin:0 auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.frow b{color:var(--ink);font-weight:600}
+.frow .sp{margin-left:auto}
+kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
+  border-radius:3px;padding:0 4px;background:var(--raise)}
+#save{font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+#save.ok{color:var(--auto)} #save.warn{color:var(--esc)} #save.err{color:var(--flag)}
+
+#done{display:none;text-align:center;padding:70px 20px}
+#done h2{font-size:26px;margin:0 0 8px}
+#done p{color:var(--muted);max-width:52ch;margin:0 auto 20px}
+#exp{width:100%;height:190px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:11px;margin-top:16px}
+.btn{font:inherit;font-size:13px;font-weight:600;background:var(--accent);
+  color:#fff;border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="bar"><div id="prog"></div></div>
+  <div class="hrow">
+    <div class="brand">Golden Set Console <span>&middot; SpotifyCares triage</span></div>
+    <div class="stat"><b id="s-done" class="mono">0</b><i>labelled</i></div>
+    <div class="stat"><b id="s-left" class="mono">0</b><i>remaining</i></div>
+    <div class="stat"><b id="s-rate" class="mono">&ndash;</b><i>per min</i></div>
+    <div class="stat"><b id="s-eta" class="mono">&ndash;</b><i>est. left</i></div>
+  </div>
+</header>
+
+<main>
+  <div id="work">
+    <div class="msg">
+      <div class="msgmeta">
+        <span class="pill mono" id="item-id">&mdash;</span>
+        <span class="pill mono" id="item-n">&mdash;</span>
+        <span class="pill" id="item-seen" hidden>revisit</span>
+      </div>
+      <div class="msgtext" id="msg"></div>
+    </div>
+
+    <div class="block">
+      <div class="blabel">Intent <em>press 1&ndash;9</em></div>
+      <div class="grid" id="g-intent"></div>
+    </div>
+
+    <div class="block">
+      <div class="blabel">Routing decision <em>home row auto-handles &middot; bottom row escalates</em></div>
+      <div class="route">
+        <div>
+          <div class="rhead a"><span class="dot"></span>Auto-handle</div>
+          <div class="grid g-auto" id="g-auto"></div>
+        </div>
+        <div>
+          <div class="rhead e"><span class="dot"></span>Escalate to human</div>
+          <div class="grid g-esc" id="g-esc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="extras">
+      <button class="mini" id="flag" aria-pressed="false">Flag as hard &middot; F</button>
+      <input id="note" placeholder="Optional note &mdash; why this one was tricky">
+      <button class="mini" id="back">&larr; Previous</button>
+      <button class="mini" id="skip">Skip &rarr;</button>
+    </div>
+  </div>
+
+  <div id="done">
+    <h2>All 0 items labelled</h2>
+    <p id="donesub"></p>
+    <button class="btn" id="copy">Copy labels to clipboard</button>
+    <button class="btn" id="dl" style="background:var(--raise);color:var(--ink)">Download JSON</button>
+    <textarea id="exp" readonly class="mono"></textarea>
+  </div>
+</main>
+
+<footer><div class="frow">
+  <span><b>1&ndash;9</b> intent</span>
+  <span><b>A S D</b> auto</span>
+  <span><b>Z X C V B N M</b> escalate</span>
+  <span><kbd class="lite">&#8592;</kbd> back</span>
+  <span><kbd class="lite">F</kbd> flag</span>
+  <span><kbd class="lite">/</kbd> note</span>
+  <span class="sp mono" id="save">local only</span>
+</div></footer>
+
+<script>
+const ITEMS = [{"id": "g0219", "text": "@BRAND How bout you acquire streaming to the #AppleWatchSeries3 <URL>"}, {"id": "g0142", "text": "@BRAND help! My account was hijacked :("}, {"id": "g0057", "text": "@BRAND I can't believe that the family plan does not have an admin feature to block explicit content on any/all users using the account?"}, {"id": "g0102", "text": "@BRAND Someone has changed the email address of my Spotify account and taken it over! Could someone contact me asap to fix this?"}, {"id": "g0019", "text": "@BRAND you just added this album but it’s not a 2017 release <URL>"}, {"id": "g0012", "text": "Saya bahkan tidak pernah install aplikasi @<USER> di hp saya, tapi bisa muncul tagihan. Bagaimana ini?? @<USER>"}, {"id": "g0054", "text": "@BRAND you signed me out of my account and I can’t log back in because it’s saying “I’m abroad” when i’m not???"}, {"id": "g0131", "text": "This just in: @AskPlayStation and @BRAND are absolutely no help, and now I don’t even have a usable account to listen to music."}, {"id": "g0228", "text": "@BRAND i am part of a family sub and am also being charged an additional 9.99 on my credit card name is __email__"}, {"id": "g0086", "text": "Still blows my mind that @BRAND doesn't have a \"Clean Only\" option. I would pay additional on top of my premium account for that option."}, {"id": "g0127", "text": "@BRAND can I upgrade from premium to family and still pay on my phone bill?"}, {"id": "g0156", "text": "the fuck is this @BRAND i’m tryna listen to Like That by jack and jack 😤😤👊🏼 <URL>"}, {"id": "g0224", "text": "@<USER> did you guys remove the equalizer feature on the iPhone App?"}, {"id": "g0027", "text": "@BRAND Just changed my plan from monthly payments to yearly. Want to make sure I won't be double charged for this month. Thanks"}, {"id": "g0099", "text": "@BRAND #longlivetheonionking #introfundays #poopemoji"}, {"id": "g0001", "text": "@BRAND when are you guys launching byour service in India? I hope it's before the year 3000. Cuz i will be dead by then."}, {"id": "g0185", "text": "@BRAND Any chance you can seperate new #albumsyoumusthear from new #singles. It's the most annoying thing ever!!"}, {"id": "g0223", "text": "@BRAND i wanna sync this song from local files but why there is no album artawork like this. While in mu pc have the artwork. <URL>"}, {"id": "g0248", "text": "@BRAND my spotify app doesn’t work are thee problems with the app?"}, {"id": "g0112", "text": "Man, I really wish @BRAND would have ways to connect with your friends other than Facebook. None of my friends use facebook."}, {"id": "g0110", "text": "Yo, @BRAND can you maybe change my ads back to English because I don’t speak Spanish... 😬"}, {"id": "g0129", "text": "@BRAND why is everything loading for ages?"}, {"id": "g0201", "text": "@BRAND why you didn’t include twice’s korean version song? I’m so disappointed 🤦🏻‍♂️"}, {"id": "g0106", "text": "put joan jett’s i love rock ‘n roll & bad reputation on ur app or else @BRAND"}, {"id": "g0121", "text": "@BRAND I'm trying to play @<USER> & it keeps saying the song is unavailable, on desktop & mobile - no prob with others. Help?"}, {"id": "g0100", "text": "@BRAND yall some snakes. where my presale code @?"}, {"id": "g0064", "text": "petition for @BRAND to add born singer by @<USER> on spotify."}, {"id": "g0155", "text": "Please @BRAND, fix your app for Windows Phone 10, you're amazing, your app blows. I have never spent this much time looking at a black screen"}, {"id": "g0165", "text": "Hey @BRAND how about you push a useful update? <URL>"}, {"id": "g0208", "text": "@BRAND could we get a feature to see how many songs we listened to in a session like after listening to a playlist on shuffle for a few hours idk why but i want to know"}, {"id": "g0062", "text": "@BRAND ,when it's going to be available in Romania? 🇷🇴"}, {"id": "g0152", "text": "@BRAND 😡 <URL>"}, {"id": "g0229", "text": "Dude... change it to your 3 months for 99 cents deal. That's literally the best deal of existence @BRAND @BRAND <URL>"}, {"id": "g0113", "text": "@BRAND you guys overcharged me twice for the student discount this month!"}, {"id": "g0053", "text": "@BRAND My account name is tcmchiu I would like to keep only family plan which is HK$ 88 per month."}, {"id": "g0161", "text": "That moment when you wonder if you should be tweeting to @BRAND or @comcastcares because not a single song has played without interruption... 😩"}, {"id": "g0154", "text": "@BRAND put my name in lowercase tho..."}, {"id": "g0098", "text": "@BRAND @BRAND When are you guys updating your app to target Android 8.0? 🤨"}, {"id": "g0096", "text": "@BRAND any idea when you’ll fix the WiFi glitch? Music won’t load when connected to work WiFi. Forums show this is a known issue?"}, {"id": "g0198", "text": "@BRAND hey I paid for premium and still get ads and can skip tracks. Help?!"}, {"id": "g0239", "text": "@BRAND How do I retrieve my email used for my account? I can't remember which I used and can't log in"}, {"id": "g0174", "text": "can y’all update your app for iPhone X thanks 🙏🏼 @BRAND @BRAND"}, {"id": "g0190", "text": "@BRAND where are u with super slimey? you are 6 minutes late"}, {"id": "g0061", "text": "@BRAND PUT @<USER> and @<USER> MIXTAPE OUT NOW <URL>"}, {"id": "g0043", "text": "@BRAND you guys need better customer service. This will be the third time I've talked to you without anyone helping me."}, {"id": "g0052", "text": "so ummmm whose got a bigger library @BRAND or @<USER>?"}, {"id": "g0153", "text": "@BRAND so my account disappeared!???????"}, {"id": "g0083", "text": "Can @BRAND get it together today? Your ruining my Monday morning even more"}, {"id": "g0209", "text": "@BRAND need help logging in, we are not getting reset link to any email we have. No way in"}, {"id": "g0140", "text": "@BRAND hey it's happening again @<USER> has more listeners but @<USER> is ranked ahead of him inspite of having less amount of listeners. Is there a problem at my end or is this what everyone is seeing??? #Spotify #WalkOnWater #Reputation <URL>"}, {"id": "g0123", "text": "@BRAND my spotify still isnt fixed. Id like to actually use the app. If it isnt working then it's just taking up space in my phone."}, {"id": "g0237", "text": "@BRAND both my iphone app and my web app just start playing whenever they feel like it right now, can you help? Noticed it the last 4 days"}, {"id": "g0081", "text": "@BRAND please add Boom Boom to Dinah Janes page @<USER>"}, {"id": "g0070", "text": "Had a few issues with my Premium Spotify account - I've never received a better level of customer service. Impressed 👍 @BRAND"}, {"id": "g0149", "text": "Dear @BRAND that was never 30 minutes. #Spotify"}, {"id": "g0120", "text": "@BRAND who do I need to contact I’m not finding my name under artist search"}, {"id": "g0230", "text": "@BRAND help! added family account and 2 of us are up and running, other has tried everything and clicking link in email diverts to this ?? <URL>"}, {"id": "g0103", "text": "@BRAND I️ need to change my account to the student plan but the website won’t stop loading"}, {"id": "g0166", "text": "@BRAND pls have girls generations' japanese discography uploaded ♡"}, {"id": "g0144", "text": "@BRAND Hey! I'm trying to change my billing details for Premium but it's asking for an NUS Card which I no longer have.... <URL>"}, {"id": "g0146", "text": "@BRAND Are Premium trials able to stream to Chromecast devices? My device is grayed out on the share menu on my iPhone."}, {"id": "g0016", "text": "@BRAND hi there, I'm trying to add my brother to my family subscription but he isn't receiving the email invite please advise..."}, {"id": "g0207", "text": "@BRAND I belong to premium for family, but my phone reset all the apps,I can't access to my premium acct I can't listen what I want plus I have to listen the ads.I got the invitation from My brother but when I sign in takes me to the same account. What can I do?"}, {"id": "g0105", "text": "Amazingly I can't seem to find a 'subscribe' button from within my iPhone @BRAND app! Am I missing something?!"}, {"id": "g0118", "text": "@BRAND HELP- Need help with upgrading to premium for students. It's not working. Says it can't confirm. I have a .edu account I am using.."}, {"id": "g0220", "text": "Anyone know if there's a way to see on @BRAND the exact date an album was released? All I can find is the year."}, {"id": "g0159", "text": "Why is the official High School Musical 2 soundtrack not on @BRAND? I thought we were all in this together? How are we going to work this out? Do I gotta go my own way? #HSM #HighSchoolMusical #Spotify #WildcatWednesday <URL>"}, {"id": "g0114", "text": "@BRAND I keep getting this message when I try to login. I’m on an iPhone running iOS 11. <URL>"}, {"id": "g0018", "text": "@BRAND why have u been broken lately"}, {"id": "g0088", "text": "@BRAND what's wrong with this app? Crashed 3 times in 30 minutes. 😑 <URL>"}, {"id": "g0023", "text": "@BRAND hey Spotify! having issue playing artists on the Mac desktop app. all ok on mobile and web. tried full reinstall/reboot.ideas?"}, {"id": "g0008", "text": "@<USER> nu är det andra gången på två veckor som jag blir utloggad från mitt konto och inte tar mig in pga \"ingen uppkoppling\" (vilket jag har). Tvingas installera om appen och alla spellistor måste laddas ner igen. När ska ni lösa detta?"}, {"id": "g0034", "text": "@BRAND Having trouble adding a person to Spotify Family account. They do not get the email when I send the request."}, {"id": "g0059", "text": "Yo @<USER> I'm still trynna bump welcome to fazoland on @BRAND but mad songs have the wrong name on it shits annoying.. @BRAND"}, {"id": "g0084", "text": "i want videos @BRAND <URL>"}, {"id": "g0186", "text": "@BRAND how can I renew my student Spotify discount? My first 12 months are about to expire at the end of the month but I don’t know how to renew the discount."}, {"id": "g0055", "text": "How does one get a live support representative from Spotify?@BRAND"}, {"id": "g0051", "text": "@BRAND everytime i play music and lock my phone the songs either pause or skip. I've re downloaded app and still not helped any ideas? thanks!"}, {"id": "g0137", "text": "So now @BRAND making us put our credit card info for free 30 day premium account"}, {"id": "g0005", "text": "@BRAND Hi, how much does it care to get your (my) artist profile verified? It's been 2/3 week since I first sended the request and I've got no email back from your team :c"}, {"id": "g0046", "text": "@BRAND anything about India launch?"}, {"id": "g0232", "text": "@BRAND Spotify I cancelled my premium account with you a few months back yet you have continued to charge me. Please confirm - username is mazowiecki"}, {"id": "g0050", "text": "Why does @BRAND keep deleting my downloaded songs?!! 😡😡😡"}, {"id": "g0199", "text": "@BRAND I just started my premium subscription again and thought it was the student one but it was £9.99. Can I get the extra £5 back?"}, {"id": "g0079", "text": "@BRAND. I tried to get premium for students and didn't work. Think my school is not a valid one. But i still got charged for it"}, {"id": "g0157", "text": "@BRAND Is there a way to filter out songs labelled ‘explicit’ on the app?"}, {"id": "g0227", "text": "@BRAND Can you please answer my DM? Thanks"}, {"id": "g0225", "text": "@BRAND \"Activity\" seems to be in permanent \"loading\" mode, so nothing's coming up. How to fix this? (Windows Vista Basic. PC/Laptop.) Thanks if you can help."}, {"id": "g0090", "text": "Tfw my @BRAND playlists from when I was 21 are forever gone because some douche canoe hacked into my account <URL>"}, {"id": "g0238", "text": "@BRAND is there any sort of timetable for an Apple Watch app? Considering switching to Apple Music if there is no news."}, {"id": "g0234", "text": "@BRAND I have tried to take up the spotify premium offer of 9.99 for 3 months and it says 'It looks like you've already taken a free trial or discount offer. Our regular Spotify Premium plan is just a click a way. Click continue to read more.' I don't understand."}, {"id": "g0171", "text": "@BRAND Hi! How can I get my Podcast onto Spotify so that my followers can listen on your awesome app? An I shooting for the stars or what?"}, {"id": "g0163", "text": "#REPUTATION STILL ISN'T HERE @BRAND PLEASE FIX UR LIFE"}, {"id": "g0015", "text": "lol @BRAND @BRAND please fix, the app is drunk 😂 <URL>"}, {"id": "g0058", "text": "@BRAND how do I play NBA connected jersey playlists on my Spotify account in Canada?"}, {"id": "g0085", "text": "@BRAND WHERE IS UNPLUGGED!!!!!! I NEED TO HEAR TYB x USE SOMEBODY"}, {"id": "g0241", "text": "When you have @BRAND premium and follow @<USER>, but haven’t gotten a presale code yet & tickets went on sale. Help?"}, {"id": "g0033", "text": "@BRAND Need help logging on. Gives error when trying to reset password...CSRF toknn is invalid."}, {"id": "g0036", "text": "@BRAND Hey guys I’m already a premium subscriber. How do I say yes to the special 99$ yearly rate ending 12/31. ? Thx."}, {"id": "g0004", "text": "@BRAND You app continues to re-enable startup at login. Why are you forcing this? I mean this is still my mac right?"}, {"id": "g0192", "text": "When will Reputation be put on @BRAND ?! 😩"}, {"id": "g0067", "text": "@BRAND please fix @<USER>'s deluxe album because the sound quality is terrible. it makes it sound like my speakers are blown out. :("}, {"id": "g0093", "text": "@BRAND hi, just tried to sign up for Family Premium; now been charged 3 times, but my account still says 'free'."}, {"id": "g0172", "text": "Hey @BRAND, how about lyrics? I’ll pay additional for that. (And no, not the Behind the Lyrics thingy)"}, {"id": "g0074", "text": "Why does my @BRAND think I live in Atlanta?"}, {"id": "g0195", "text": "@BRAND Hello! I'm having a problem with my Spotify stopping and starting itself a lot, sometimes it even plays out a random track that I haven't chosen! Can you help?"}, {"id": "g0094", "text": "Yo @BRAND you are a *music* app, please stop having every single artist wish me a merry Christmas in between songs."}, {"id": "g0056", "text": "thanks for solving my @BRAND problem, @BRAND !"}, {"id": "g0189", "text": "@BRAND hi! I just paid for my premium student account but i am still on free??! please fix that. i didnt even got an email but the money is already charged from my bank account"}, {"id": "g0115", "text": "@BRAND Issues adding family members to my Family account. Error Code 3. Please help! She can't login."}, {"id": "g0236", "text": "@BRAND I have an NUS student card, but I dont have an UNI e-mail because i am completing a foundation degree in payroll management via CIPP. How do i get my discount on Spotify?"}, {"id": "g0160", "text": "@BRAND where is GOT7 and GFRIEND'S LOL album on Spotify"}, {"id": "g0193", "text": "Where TF are @<USER>'s \"The Suburbs\" and \"Ref<ORDER>\", @BRAND @<USER> ?!?!?!"}, {"id": "g0119", "text": "@BRAND im listening to music on spotify and nothing appears on my screen unless i go on the app (I like Mbappé) <URL>"}, {"id": "g0022", "text": "@BRAND i have a questionnnnnnnnnnnnn"}, {"id": "g0181", "text": "Hey @<USER> I’m pretty sure that’s not her.... <URL>"}, {"id": "g0202", "text": "@BRAND on the new update I can’t access the search engine on the latest updated version. In fact I cant get past the ‘Home’ screen. Help"}, {"id": "g0136", "text": "y isn’t bad reputation on @BRAND"}, {"id": "g0122", "text": "Hey @BRAND can you make this happen? Because seriously this girl could use some help #foreveraspinster <URL>"}, {"id": "g0035", "text": "Hey @BRAND @BRAND What the fuck? <URL>"}, {"id": "g0080", "text": "@BRAND could y’all tweak yalls Release Radar algorithm so I don’t get so much bullshit on my phone every Friday?"}, {"id": "g0128", "text": "@BRAND Please help me cancel my premium spotify"}, {"id": "g0024", "text": "@BRAND you guys are gods. New Galneryus and you added Maximum the Hormone. A thousand thank yous"}, {"id": "g0042", "text": "@BRAND If I'm paying for premium, why do I still see advertisements? This seems to violate the traditional \"ads or membership\" model. :("}, {"id": "g0143", "text": "@BRAND my phone plan is now including spotify - so how do I change from paying for it for myself? thanks"}, {"id": "g0138", "text": "fix your bugs pls I don't pay you for shit @BRAND"}, {"id": "g0211", "text": "Okay @BRAND here's a little ad strategy for you. Why play ads where the message is delivered via video on your service while only a 15 sec beat plays with no words? Assuming the goal is to deliver the message to an audience, why give video to a massively audio audience?"}, {"id": "g0130", "text": "@BRAND why isn’t my visa gift card working when there’s money on the card? Your site said it’s an accepted method of payment"}, {"id": "g0247", "text": "@BRAND what’s up with Spotify today? None of menus will load. I’ve deleted and reinstalled the app several times, to no avail."}, {"id": "g0091", "text": "@BRAND Spotify on the PS4 at all I tried a lot of things and it still won’t work."}, {"id": "g0135", "text": "How do I convince @BRAND to hire me so I can make them playlists all day. TELL ME HOW"}, {"id": "g0200", "text": "@BRAND why is my discover weekly either songs I have removed from my saved list or song you keep trying to force down my throat every week."}, {"id": "g0226", "text": "Humble request for @BRAND- add a feature that allows me to select a song, and see user created playlists that it belongs to. I feel like that'd be a perfect way to discover new music I would like."}, {"id": "g0116", "text": "Yoooooo @BRAND @BRAND i wish the desktop version had a work safe ad version. I just had a fully naked butt pop up as a banner ad."}, {"id": "g0243", "text": "@BRAND sort your shit out man don’t have premium for you to not even let me on the app"}, {"id": "g0010", "text": "@BRAND me and my wife have separate spotify accounts but we want to get the family plan. Do one of us have cancel an account and get invited to the family plan? what about the payment plan? do the single accounts automatically switch to the family account?"}, {"id": "g0048", "text": "Hey @BRAND it’s cool that you added Hulu to my student plan, but if y’all don’t let me play my music I’m going to have to drop you."}, {"id": "g0032", "text": "@BRAND please help me, i have a trouble joining the premium for family member. i forgot the exact address used, what should i do?"}, {"id": "g0049", "text": "@BRAND I can’t log in and when I try to reset my password it says my address isn’t registered. It is. Help me please"}, {"id": "g0203", "text": ".@BRAND how u make ur daily mixes so tight?"}, {"id": "g0040", "text": "Fair warning 😕 <URL>"}, {"id": "g0037", "text": "@BRAND hiiii, just sent you a Dm!"}, {"id": "g0075", "text": "@BRAND TIL email addresses with capitals aren't allowed, good thing I know how to inspect element because the error was useless"}, {"id": "g0214", "text": "LOOOOOOL thanks x <URL>"}, {"id": "g0170", "text": "@BRAND I am having trouble logging in on my Samsung smart TV. Everytime I do, it says a premium account is required even though I do pay for one."}, {"id": "g0169", "text": "@BRAND can you please add the like/dislike button as standard in the song screen in the android app? so we can also like/dislike songs in discover weekly and new release radar? thanks!"}, {"id": "g0158", "text": "Ok howtf do people actually USE @BRAND???? Doesn't work on my computer. Doesn't work in the Xbox app. I hit play and nothing happens. Back to @<USER>."}, {"id": "g0071", "text": "It’s 2017 and @<USER> @BRAND still didn’t figure out how to store more than 3333 songs for offline listening on your phone . #fail"}, {"id": "g0092", "text": "UPDATE IPHONE X @BRAND @BRAND"}, {"id": "g0017", "text": "When you can’t access your @BRAND account cos you deleted your Facebook account& have lost your saved music & playlists& part of you dies"}, {"id": "g0145", "text": "Fuck you @BRAND you deleted all my shit from even my saved library your devs are garbage your update cycle sucks dick ass shit app"}, {"id": "g0183", "text": "Will we ever have a good music streaming app like @BRAND in Pakistan?"}, {"id": "g0205", "text": "@BRAND STOP PLAYING SUGGESTED TRACKS WHEN IM TRYING TO STREAM SOMETHING IM TOO BROKE FOR PREMIUM"}, {"id": "g0069", "text": "Why, after like 10 years, is my commute still akin to an error state, @BRAND? <URL>"}, {"id": "g0162", "text": "@BRAND , we need to talk ."}, {"id": "g0164", "text": "i hate asking for refunds. but my sister just asked me to ask spotify for a refund And im looke im so sorry i love your app and i pay 10 dollars a month for your servcie my sister just wants her 5 dollars back please thanks"}, {"id": "g0240", "text": "@BRAND hi. I set up my account in the UK but now live in Australia so need to change my billing details to my aus account. This is a change is currency so how will I be charged?"}, {"id": "g0072", "text": "@BRAND I just signed up for Premium Family, entered the wrong Zip code. Changed in FB, but did change in Spotify. How do I fix this?"}, {"id": "g0073", "text": "@BRAND please help. Signed up to a premium family account but the email is not going to my wife."}, {"id": "g0191", "text": "@BRAND give me thugger x future"}, {"id": "g0003", "text": "@BRAND please help! I just realized I’ve been getting double charged for my account since March!"}, {"id": "g0014", "text": "@BRAND someone, somewhere is using my account and it's interrupting my listening. I've already changed my password, can you help?"}, {"id": "g0233", "text": "@BRAND hay i recently upgrade my spotify to premium but its not upgraded at all in my app."}, {"id": "g0021", "text": "@BRAND I'm unable to play any of the tracks from here on Android. Any idea why? <URL>"}, {"id": "g0009", "text": "I hate that I pay $10 a month for @BRAND to download on my phone and on every Friday when my phone connects to the network, everything in a Spotify curated playlist gets deleted off my phone. I wonder if Apple Music does this..."}, {"id": "g0108", "text": "@BRAND You guys should have a “skip this song” or a “never play” option in playlists. So many good playlists are ruined by a couple songs."}, {"id": "g0246", "text": "@BRAND Your web player fucking blows."}, {"id": "g0187", "text": "👍🤛 <URL>"}, {"id": "g0125", "text": "@BRAND No songs are \"available\" at the moment for me. I've tried web player and desktop client. Please help!"}, {"id": "g0231", "text": "I’m just gonna have to cancel service @BRAND cause it’s really annoying not being able to multitask while using yalls app"}, {"id": "g0089", "text": "@BRAND @<USER>'s remixes are incorrectly attributed to the jazz saxophonist with the same name"}, {"id": "g0044", "text": "Dear @BRAND you need a dislike button so I can banish any and all Chris Brown songs from popping up"}, {"id": "g0045", "text": "@<USER> you’re regressing"}, {"id": "g0175", "text": "That was sweet of yall to reply😘 <URL>"}, {"id": "g0148", "text": "@BRAND I seem to have been double charged for a Spotify Family membership as well as a Premium membership through Apple. Help!"}, {"id": "g0104", "text": "Happy almost six months since I asked about this, @BRAND! <URL>"}, {"id": "g0087", "text": "Someone hacked my spotify and cancelled my premium... why tho?"}, {"id": "g0065", "text": "Hey @BRAND could you please change the picture to Louis Tomlinson and add his new song ‘just like you’ to the playlist? 😊 <URL>"}, {"id": "g0177", "text": "Hey @BRAND , still waiting for the update #iphoneX <URL>"}, {"id": "g0076", "text": "@BRAND somehow made the search feature worse by forcing you to sort through the album to find the song you recently played."}, {"id": "g0188", "text": "@BRAND I've tried everything I can find to try but my application will still not launch on osx 10-13. Please advise. Sick of using webplayer."}, {"id": "g0218", "text": "@BRAND put perfect velvet on spotify already I'm tired"}, {"id": "g0030", "text": "@BRAND hello hi i'd like to ask why the nxworries album 'yes lawd' is not on spotify anymore"}, {"id": "g0068", "text": "Yo @BRAND quick <URL> in the hell is Nelly not a related artist of Murphy Lee and the St.Lunatics?"}, {"id": "g0077", "text": "@BRAND I'm having issues logging in, I've DMd you the details."}, {"id": "g0197", "text": "@BRAND I heard a rumor that your service will come to Romania next month, is it true ?"}, {"id": "g0167", "text": "@BRAND have moved country and cancelled old cc. Now I can’t change country without putting in new payment details and vice versa. Hlp"}, {"id": "g0013", "text": "@BRAND Trying to update payment info for premium. Keeps saying I'm registering for student then I can't prove I'm a student???"}, {"id": "g0063", "text": "Yo @BRAND, if I type in \"Crossroads\" and have to hit \"See all songs\" to get to @<USER>, then your algorithm could use some fixin."}, {"id": "g0134", "text": "@<USER> hiiii how could we be on a cool @BRAND rock playlist pls?"}, {"id": "g0178", "text": "@BRAND i️ went to listen to an artist and now it says that most of their music is unavailable in my country. is there any chance of music being made available again?"}, {"id": "g0217", "text": "@BRAND pls increase the downloaded song cap. This is such a struggle. I’d pay $ for more songs! Thanks @<USER> for the rec via IG! <URL>"}, {"id": "g0038", "text": "@BRAND Hi there, artist name should be Henry, not Herny *cringe* :D <URL>"}, {"id": "g0060", "text": "@BRAND I have not received any email to resolve this issue. I'm paying for premium but the service is not working on new phone."}, {"id": "g0244", "text": "@BRAND is your search engine down in the uk?"}, {"id": "g0000", "text": "@BRAND why have all my songs gone from my app and been replaced by songs I have never listened to !!!! So annoying"}, {"id": "g0150", "text": "When will @<USER> songs be on @BRAND so I can jam to them all"}, {"id": "g0221", "text": "When the #Reputation will be on @BRAND?? I can't wait, rlly. @<USER> please make up your mind and give us the perfection we are waiting for."}, {"id": "g0082", "text": "@BRAND Spotify premium app on my smart TV won't bring up the option to pull up my playlists! It's there on all my other devices."}, {"id": "g0206", "text": "Can I have help adding a family member @BRAND"}, {"id": "g0117", "text": "@BRAND the premium account came out, without any explanation, the account is familiar and only mine does not work!! :( Help pls...."}, {"id": "g0139", "text": "DM@Spotify <URL>"}, {"id": "g0210", "text": "@BRAND is excellent and friendly support when you need them. Keep up the good work, guys! 🙂👌"}, {"id": "g0047", "text": "@BRAND Did the last PC update change something with the audio? I hear some instruments through just 1 ear and that has never happened before the update."}, {"id": "g0007", "text": "@BRAND how can I disable behind the lyrics? I hate that feature. I've done this and doesn't works <URL>"}, {"id": "g0107", "text": "@<USER> forgot my email and username"}, {"id": "g0132", "text": "@BRAND #BugReport: Everytime I press back from 'About' to 'Overview' in Artist page, the page runs to bottom & not to the top."}, {"id": "g0028", "text": "@BRAND please can you switch my USA account to be a UK account? username: ejweston *thank you!"}, {"id": "g0180", "text": "@BRAND i am paying for the premium service, but its not working, i cannot shuffle or forward more than 6 times, can you help please"}, {"id": "g0147", "text": "@BRAND HELP! My account is tied in to a former client's email. I do not have the password. I want to delete and start over. #stumped"}, {"id": "g0196", "text": "@BRAND trying to change my payment method because I moved from the UK to Canada and when entering my new card info = card from a non-spotify country. How can it be done?"}, {"id": "g0025", "text": "@BRAND when you wake up I'm going to need a refund"}, {"id": "g0194", "text": "Hey @BRAND I’ll get premium but can I get a free trial?"}, {"id": "g0039", "text": "It is such a blasphemy that Spotify still doesn't have Lemonade. Hey @BRAND get your shit together it's 2017!! <URL>"}, {"id": "g0006", "text": "@BRAND y’all should let us see the total amount of streams of an album on the mobile version"}, {"id": "g0097", "text": "@BRAND how do I view the full featured artists instead of seeing the dots? When the song is playing it doesn’t even list the features <URL>"}, {"id": "g0111", "text": "@BRAND Having major trouble with my mobile account and connecting to facebook sign-in. Bought premium, love product but getting sad!"}, {"id": "g0168", "text": "@BRAND Why can't I no longer use a Mastercard gift card. I used one about 1 month ago but now it won't work. Help thanks"}, {"id": "g0109", "text": "@BRAND Getting really tired of trying to get Spotify family plan codes to work for my family members. About to just cancel my plan altogether and find a better option..."}, {"id": "g0029", "text": "@BRAND hey, I just signed up for premium and there's still songs that the app and we app won't let me play. 🙁"}, {"id": "g0078", "text": ". @BRAND needs a comments section for albums or artists or something"}, {"id": "g0176", "text": "Yes please. We actually reported this months ago. The year's about to end but still nothing. <URL>"}, {"id": "g0235", "text": "@BRAND @BRAND ASAP"}, {"id": "g0133", "text": "@BRAND make it easier to create playlists. Make it easier to delete songs off of playlists. That is all. great job other than that"}, {"id": "g0066", "text": "@BRAND when you search for a song and it’s on shuffle, the song you click doesn’t necessarily play"}, {"id": "g0031", "text": "@BRAND thanks for your complete lack of response"}, {"id": "g0151", "text": "@BRAND I was charged twice for a student sub and I don't have premium."}, {"id": "g0011", "text": "@<USER> Hey Athena, is there any way to contact you about a copyright infringing track in the new edition of Fresh Finds: Hiptronix?"}, {"id": "g0020", "text": "@BRAND could we get a setting to block ads for horror films?don't mind ads for free acct but surprise scary ones can mess a girl up!🧡"}, {"id": "g0213", "text": "@BRAND guys when will I be able to stream directly to my Apple Watch 3 LTE?"}, {"id": "g0126", "text": "Hi @BRAND I can’t seem to be able to log in with my Facebook. It keeps saying I can only use it abroad for 14 days and I’m not abroad"}, {"id": "g0249", "text": "@BRAND y’all need to go bug @<USER> and get “Officially Yours” added to the library ASAP"}, {"id": "g0184", "text": "@BRAND @BRAND you charged me and didnt give me the hulu + spotify promotion!!!"}, {"id": "g0124", "text": "@BRAND when is spotify gonna be able to play on my lg tv?"}, {"id": "g0222", "text": "@BRAND Google home tries to logon to an old FB when I am trying to link default music to spotify...help!!?"}, {"id": "g0026", "text": "hey @BRAND i'm gonna need u guys to stop playing horror movie ads at night. i'm just tryna enjoy my \"simp/sad/feels\" playlist."}, {"id": "g0179", "text": "@BRAND can I transfer my playlists and songs from my account created with Facebook to a new account?"}, {"id": "g0242", "text": "WE WANT @BRAND IN INDIA !!!"}, {"id": "g0173", "text": "HOYYY BAT WALA SA @BRAND YUNG FULL ALBUM NG REPUTATIONNNNN!!! ARGHHHHH QIQIL NIYO KO HAAAA"}, {"id": "g0095", "text": "@<USER> halo, saya tidak bisa masuk ke akun spotify saya lagi. Sekarang malah dibilang email yang saya pakai tidak terdaftar."}, {"id": "g0041", "text": "Hello @<USER> is this Promo correct? - Promo price - ✔ 3 months premium for Rp 49.990,- payment through Credit Card & Pulsa (IM3, 3, Smartfren) - Normal price - ✔ 1 month premium for Rp 49.990,- payment through Bank (ATM & E-Banking) & Cash (Alfa, DanDan, Lawson) <URL>"}, {"id": "g0002", "text": "@BRAND my wife invited me to family premium. Where do I input the invite code to accept the invitation?"}, {"id": "g0141", "text": "hey @<USER> ... logged in but can't do much <URL>"}, {"id": "g0216", "text": "Why does @BRAND not have a song identifying tool? It could take you directly to stream the single or album. It becomes more convenient to add it to a playlist. People are encouraged to use the platform even when they're not listening to music. I am lazy. Please hurry."}, {"id": "g0101", "text": "@BRAND You either remove the Behind the lyrics from ”Man’s Not Hot” song or else I’m deleting the your app and moving to Apple Music!"}, {"id": "g0215", "text": "@BRAND take them videos off your playlist, some of us want to listen and spend copious amounts of data on videos of songs we hate"}, {"id": "g0204", "text": "@BRAND hey guys i applied for student discount and got accepted but still being billed at premium rate. please help me"}, {"id": "g0245", "text": "@BRAND someone hacked into my account..."}, {"id": "g0212", "text": "@BRAND what even is this setting?? I have it automatically on and that terrifies me??? Am I going to be taken by a monster? Pls I’m scared <URL>"}, {"id": "g0182", "text": "Why doesn't @BRAND have a Shazam-like plugin to listen, identify & then ADD a song to a playlist... #YoureWelcome #RoyaltiesAccepted 😉"}];
+const INTENTS = [{"name": "billing_and_subscription", "label": "billing and subscription", "desc": "Payment, charges, plan changes, refunds, student/family pricing"}, {"name": "account_access", "label": "account access", "desc": "Login, password, recovery, deletion, linked accounts, security"}, {"name": "playback_and_app_issues", "label": "playback and app issues", "desc": "App crashes, songs won't play, sync, device/connectivity problems"}, {"name": "content_unavailability", "label": "content unavailability", "desc": "Missing tracks/albums/artists, removed content, add-to-catalogue requests"}, {"name": "playlist_and_discovery", "label": "playlist and discovery", "desc": "Playlist tooling, recommendations, podcasts, discovery features"}, {"name": "regional_and_verification", "label": "regional and verification", "desc": "Country availability, launch requests, student/identity verification"}, {"name": "non_actionable_generic", "label": "non actionable generic", "desc": "No problem described - just 'help' or a bare link"}, {"name": "ads_issues", "label": "ads issues", "desc": "Ad frequency, ad content, ads despite Premium"}, {"name": "other", "label": "other", "desc": "A real request that fits none of the above"}];
+const AUTO = [{"name": "known_answer", "key": "a", "label": "known answer", "desc": "A documented answer or standard fix applies"}, {"name": "triage_question", "key": "s", "label": "triage question", "desc": "Correct reply is a clarifying question, safe to send"}, {"name": "acknowledge_only", "key": "d", "label": "acknowledge only", "desc": "Feedback or praise; a courteous acknowledgement suffices"}];
+const ESC = [{"name": "needs_account_access", "key": "z", "label": "needs account access", "desc": "Cannot be resolved without looking inside the account"}, {"name": "payment_or_refund", "key": "x", "label": "payment or refund", "desc": "Requires moving money or changing a subscription"}, {"name": "security_or_fraud", "key": "c", "label": "security or fraud", "desc": "Suspected compromise, unauthorised access or fraud"}, {"name": "insufficient_info", "key": "v", "label": "insufficient info", "desc": "Not answerable until the customer supplies more detail"}, {"name": "angry_or_vulnerable", "key": "b", "label": "angry or vulnerable", "desc": "Tone or circumstances warrant a human touch"}, {"name": "policy_or_legal", "key": "n", "label": "policy or legal", "desc": "Legal threat, press, formal complaint or policy exception"}, {"name": "out_of_scope", "key": "m", "label": "out of scope", "desc": "Not a support request Spotify can act on"}];
+const LS = "hiver_golden_v1";
+
+let labels = {};
+let i = 0, shownAt = Date.now(), db = null;
+try { labels = JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { labels = {}; }
+
+const $ = s => document.querySelector(s);
+const cur = () => ITEMS[i];
+
+function optionHTML(o, key) {
+  return `<button class="opt" data-key="${key}" aria-pressed="false">
+    <kbd>${key}</kbd><span><span class="t">${o.label}</span><span class="d">${o.desc}</span></span></button>`;
+}
+$("#g-intent").innerHTML = INTENTS.map((o, n) => optionHTML(o, String(n + 1))).join("");
+$("#g-auto").innerHTML = AUTO.map(o => optionHTML(o, o.key)).join("");
+$("#g-esc").innerHTML = ESC.map(o => optionHTML(o, o.key)).join("");
+
+const keyToIntent = {}; INTENTS.forEach((o, n) => keyToIntent[String(n + 1)] = o.name);
+const keyToRoute = {};
+AUTO.forEach(o => keyToRoute[o.key] = { route: "auto", reason: o.name });
+ESC.forEach(o => keyToRoute[o.key] = { route: "escalate", reason: o.name });
+
+function render() {
+  const it = cur();
+  if (!it) return finish();
+  $("#msg").textContent = it.text;
+  $("#item-id").textContent = it.id;
+  $("#item-n").textContent = (i + 1) + " / " + ITEMS.length;
+  const rec = labels[it.id];
+  $("#item-seen").hidden = !rec;
+
+  document.querySelectorAll(".opt").forEach(b => b.setAttribute("aria-pressed", "false"));
+  if (rec) {
+    const n = INTENTS.findIndex(o => o.name === rec.intent);
+    if (n >= 0) markKey("#g-intent", String(n + 1));
+    const rk = Object.keys(keyToRoute).find(k => keyToRoute[k].reason === rec.reason);
+    if (rk) markKey(rec.route === "auto" ? "#g-auto" : "#g-esc", rk);
+  }
+  $("#flag").setAttribute("aria-pressed", rec && rec.flagged ? "true" : "false");
+  $("#note").value = (rec && rec.note) || "";
+  shownAt = Date.now();
+  stats();
+}
+
+function markKey(scope, key) {
+  const b = document.querySelector(`${scope} .opt[data-key="${key}"]`);
+  if (b) b.setAttribute("aria-pressed", "true");
+}
+
+function stats() {
+  const done = Object.keys(labels).length, total = ITEMS.length;
+  $("#s-done").textContent = done;
+  $("#s-left").textContent = total - done;
+  $("#prog").style.width = (done / total * 100) + "%";
+  const times = Object.values(labels).map(r => r.ms).filter(Boolean);
+  if (times.length >= 3) {
+    const med = times.slice().sort((a, b) => a - b)[Math.floor(times.length / 2)];
+    const perMin = 60000 / med;
+    $("#s-rate").textContent = perMin.toFixed(1);
+    const mins = Math.round((total - done) / perMin);
+    $("#s-eta").textContent = mins >= 60 ? Math.floor(mins / 60) + "h " + (mins % 60) + "m" : mins + "m";
+  }
+}
+
+function put(patch) {
+  const it = cur(); if (!it) return;
+  const prev = labels[it.id] || {};
+  const rec = Object.assign({ item_id: it.id }, prev, patch);
+  if (!prev.intent && patch.intent) rec.ms = Date.now() - shownAt;
+  rec.ts = new Date().toISOString();
+  labels[it.id] = rec;
+  try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+  save(rec);
+  stats();
+  if (rec.intent && rec.route) setTimeout(() => { if (cur() && cur().id === rec.item_id) next(); }, 260);
+}
+
+let pending = 0;
+function save(rec) {
+  if (!db) return;
+  pending++; setSave("saving…", "warn");
+  db.doc("labels/" + rec.item_id).set(rec)
+    .then(() => { pending--; if (!pending) setSave("saved", "ok"); })
+    .catch(() => { pending--; setSave("save failed — kept locally", "err"); });
+}
+function setSave(t, c) { const e = $("#save"); e.textContent = t; e.className = "mono " + c; }
+
+function next() { i = Math.min(i + 1, ITEMS.length); render(); }
+function prev() { i = Math.max(i - 1, 0); render(); }
+
+function finish() {
+  $("#work").style.display = "none";
+  const d = $("#done"); d.style.display = "block";
+  const n = Object.keys(labels).length;
+  const esc = Object.values(labels).filter(r => r.route === "escalate").length;
+  const fl = Object.values(labels).filter(r => r.flagged).length;
+  d.querySelector("h2").textContent = "All " + n + " items labelled";
+  $("#donesub").textContent = esc + " escalate, " + (n - esc) + " auto-handle, " + fl +
+    " flagged as hard. Labels are saved; you can close this page.";
+  $("#exp").value = JSON.stringify(Object.values(labels), null, 1);
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if (!b) return;
+  const key = b.dataset.key;
+  if (b.closest("#g-intent")) apply(key); else apply(key);
+});
+
+function apply(key) {
+  if (keyToIntent[key] && document.querySelector(`#g-intent .opt[data-key="${key}"]`)) {
+    document.querySelectorAll("#g-intent .opt").forEach(b => b.setAttribute("aria-pressed", "false"));
+    markKey("#g-intent", key);
+    put({ intent: keyToIntent[key] });
+    return;
+  }
+  const r = keyToRoute[key];
+  if (r) {
+    document.querySelectorAll("#g-auto .opt,#g-esc .opt").forEach(b => b.setAttribute("aria-pressed", "false"));
+    markKey(r.route === "auto" ? "#g-auto" : "#g-esc", key);
+    put({ route: r.route, reason: r.reason });
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.target === $("#note")) { if (e.key === "Enter" || e.key === "Escape") { put({ note: $("#note").value }); $("#note").blur(); } return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "arrowleft" || k === "backspace") { e.preventDefault(); prev(); return; }
+  if (k === "arrowright") { e.preventDefault(); next(); return; }
+  if (k === "/") { e.preventDefault(); $("#note").focus(); return; }
+  if (k === "f") { e.preventDefault(); const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); return; }
+  if (keyToIntent[k] || keyToRoute[k]) { e.preventDefault(); apply(k); }
+});
+
+$("#flag").onclick = () => { const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); };
+$("#back").onclick = prev;
+$("#skip").onclick = next;
+$("#note").onblur = () => put({ note: $("#note").value });
+$("#copy").onclick = () => { navigator.clipboard.writeText($("#exp").value)
+  .then(() => $("#copy").textContent = "Copied").catch(() => $("#exp").select()); };
+$("#dl").onclick = async () => {
+  const d = await (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+  if (!d) { $("#exp").select(); $("#dl").textContent = "Select the text and copy instead"; return; }
+  try { await d.save({ filename: "golden_labels.json", data: $("#exp").value }); }
+  catch (err) { $("#dl").textContent = "Download declined"; }
+};
+
+// Resume at the first unlabelled item.
+const firstOpen = ITEMS.findIndex(it => !labels[it.id]);
+i = firstOpen < 0 ? ITEMS.length : firstOpen;
+render();
+
+// db is optional: the page is fully usable on localStorage alone, and lights up
+// server-side saving only if the capability resolves.
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  db = await window.claude.use("db");
+  if (!db) return;
+  setSave("connected", "ok");
+  try {
+    const snap = await db.collection("labels").get();
+    let merged = 0;
+    snap.docs.forEach(doc => {
+      const d = doc.data ? doc.data() : doc;
+      if (d && d.item_id && !labels[d.item_id]) { labels[d.item_id] = d; merged++; }
+    });
+    if (merged) {
+      try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+      const f = ITEMS.findIndex(it => !labels[it.id]);
+      i = f < 0 ? ITEMS.length : f;
+      render();
+    }
+    stats();
+  } catch (e) { setSave("offline — saving locally", "warn"); }
+})();
+</script>
