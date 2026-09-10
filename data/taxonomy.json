@@ -1,0 +1,36 @@
+{
+  "brand": "SpotifyCares",
+  "intents": [
+    "account_access",
+    "ads_issues",
+    "billing_and_subscription",
+    "content_unavailability",
+    "non_actionable_generic",
+    "other",
+    "playback_and_app_issues",
+    "playlist_and_discovery",
+    "regional_and_verification"
+  ],
+  "merged": {
+    "podcasts": "playlist_and_discovery",
+    "event_and_presale": "content_unavailability",
+    "artist_account_access": "account_access"
+  },
+  "n_messages": 26095,
+  "shares": {
+    "billing_and_subscription": 20.28,
+    "account_access": 16.33,
+    "other": 15.87,
+    "content_unavailability": 15.67,
+    "playback_and_app_issues": 15.12,
+    "playlist_and_discovery": 6.7,
+    "non_actionable_generic": 4.04,
+    "regional_and_verification": 3.9,
+    "ads_issues": 2.08
+  },
+  "region_shares": {
+    "core": 61.03,
+    "tail": 23.1,
+    "other": 15.87
+  }
+}
