@@ -1,0 +1,8 @@
+{
+  "intent": "playback_and_app_issues",
+  "item_id": "g0098",
+  "ms": 6579,
+  "reason": "acknowledge_only",
+  "route": "auto",
+  "ts": "2026-09-10T08:48:22.165Z"
+}

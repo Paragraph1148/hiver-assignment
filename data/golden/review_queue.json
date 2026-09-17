@@ -1,0 +1,417 @@
+[
+  {
+    "id": "g0005",
+    "why": "overloaded",
+    "note": "artists ask for human contact"
+  },
+  {
+    "id": "g0006",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0009",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0020",
+    "why": "schema_gap",
+    "note": "asking to change ads preferences, feature request "
+  },
+  {
+    "id": "g0025",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0026",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0028",
+    "why": "incomplete",
+    "note": "need a human to change their country in the account, they gave their username"
+  },
+  {
+    "id": "g0031",
+    "why": "overloaded",
+    "note": "maybe need a human to finally reply, since they didn't get one previously? "
+  },
+  {
+    "id": "g0035",
+    "why": "incomplete",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0039",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0043",
+    "why": "overloaded",
+    "note": ""
+  },
+  {
+    "id": "g0044",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0047",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0054",
+    "why": "relabel",
+    "note": "Spotify incorrectly labelled as abroad"
+  },
+  {
+    "id": "g0055",
+    "why": "overloaded",
+    "note": "plainly asks for human, not bots"
+  },
+  {
+    "id": "g0057",
+    "why": "schema_gap",
+    "note": "this one is feature request"
+  },
+  {
+    "id": "g0061",
+    "why": "incomplete",
+    "note": "there could be any reason for song not available on Spotify, don't know which label to put in"
+  },
+  {
+    "id": "g0062",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0064",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0071",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0073",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0076",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0077",
+    "why": "incomplete",
+    "note": "need to see dm"
+  },
+  {
+    "id": "g0078",
+    "why": "schema_gap",
+    "note": "feature request "
+  },
+  {
+    "id": "g0081",
+    "why": "incomplete",
+    "note": ""
+  },
+  {
+    "id": "g0082",
+    "why": "relabel",
+    "note": "sha ticker should b raised to fix this issue automatically(checking previously signed tickets) "
+  },
+  {
+    "id": "g0083",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0084",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0085",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0086",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0090",
+    "why": "relabel",
+    "note": "nothing wecan do, unless Spotify keeps a backup"
+  },
+  {
+    "id": "g0099",
+    "why": "incomplete",
+    "note": ""
+  },
+  {
+    "id": "g0104",
+    "why": "incomplete",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0108",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0112",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0120",
+    "why": "overloaded",
+    "note": "artist isn't seeing the self in search, don't know what label to pick, but needs human contact for sure"
+  },
+  {
+    "id": "g0122",
+    "why": "incomplete",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0123",
+    "why": "overloaded",
+    "note": ""
+  },
+  {
+    "id": "g0129",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0133",
+    "why": "schema_gap",
+    "note": "feature request "
+  },
+  {
+    "id": "g0134",
+    "why": "incomplete",
+    "note": "idk what they are talking about"
+  },
+  {
+    "id": "g0139",
+    "why": "relabel",
+    "note": "need to see  image URL/dm"
+  },
+  {
+    "id": "g0144",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0146",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0148",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0149",
+    "why": "incomplete",
+    "note": "don't know what they are talking about"
+  },
+  {
+    "id": "g0150",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0151",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0152",
+    "why": "incomplete",
+    "note": "need to see IRL to decide what's wrong"
+  },
+  {
+    "id": "g0153",
+    "why": "incomplete",
+    "note": "tell Spotify got more songs or other service"
+  },
+  {
+    "id": "g0160",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0162",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0169",
+    "why": "schema_gap",
+    "note": "feature request maybe"
+  },
+  {
+    "id": "g0171",
+    "why": "schema_gap",
+    "note": "feature request for podcasts(wasn't available on Spotify when this was posted) "
+  },
+  {
+    "id": "g0172",
+    "why": "schema_gap",
+    "note": "feature request "
+  },
+  {
+    "id": "g0180",
+    "why": "relabel",
+    "note": "ticket should be raised automatically for this issue"
+  },
+  {
+    "id": "g0181",
+    "why": "incomplete",
+    "note": "Spotify incorrectly marked an artist as some other song? need to see image url"
+  },
+  {
+    "id": "g0182",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0185",
+    "why": "incomplete",
+    "note": "feature request maybe? "
+  },
+  {
+    "id": "g0187",
+    "why": "incomplete",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0192",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0194",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0207",
+    "why": "incomplete",
+    "note": ""
+  },
+  {
+    "id": "g0210",
+    "why": "incomplete",
+    "note": ""
+  },
+  {
+    "id": "g0211",
+    "why": "incomplete",
+    "note": "the Spotify strategy is to show ads as video, no problem, user needs to know this, but safe to ignore them I guess"
+  },
+  {
+    "id": "g0212",
+    "why": "relabel",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0213",
+    "why": "schema_gap",
+    "note": "feature request "
+  },
+  {
+    "id": "g0214",
+    "why": "incomplete",
+    "note": "need to see image url"
+  },
+  {
+    "id": "g0215",
+    "why": "schema_gap",
+    "note": "they don't like this feature, so there should be a feature request on this "
+  },
+  {
+    "id": "g0216",
+    "why": "incomplete",
+    "note": "feature request "
+  },
+  {
+    "id": "g0217",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0219",
+    "why": "incomplete",
+    "note": "its a feature request on supporting apple watch series 3"
+  },
+  {
+    "id": "g0221",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0223",
+    "why": "schema_gap",
+    "note": "asking if feature is available or not"
+  },
+  {
+    "id": "g0224",
+    "why": "incomplete",
+    "note": "rasked if we removed feature"
+  },
+  {
+    "id": "g0226",
+    "why": "schema_gap",
+    "note": "feature request"
+  },
+  {
+    "id": "g0227",
+    "why": "overloaded",
+    "note": "asks for human contact"
+  },
+  {
+    "id": "g0228",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0229",
+    "why": "incomplete",
+    "note": "not asking, but recommending to someone else to use a specific deal"
+  },
+  {
+    "id": "g0231",
+    "why": "relabel",
+    "note": "app kills itself in background"
+  },
+  {
+    "id": "g0237",
+    "why": "relabel",
+    "note": ""
+  },
+  {
+    "id": "g0241",
+    "why": "incomplete",
+    "note": "does Spotify premium have tickets support? "
+  },
+  {
+    "id": "g0243",
+    "why": "relabel",
+    "note": ""
+  }
+]

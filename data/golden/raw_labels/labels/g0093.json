@@ -1,0 +1,8 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0093",
+  "ms": 4554,
+  "reason": "payment_or_refund",
+  "route": "escalate",
+  "ts": "2026-09-10T10:39:23.932Z"
+}

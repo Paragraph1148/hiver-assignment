@@ -1,0 +1,8 @@
+{
+  "intent": "playback_and_app_issues",
+  "item_id": "g0123",
+  "ms": 16601,
+  "reason": "angry_or_vulnerable",
+  "route": "escalate",
+  "ts": "2026-09-10T08:54:52.241Z"
+}

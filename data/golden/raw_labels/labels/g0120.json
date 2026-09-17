@@ -1,0 +1,9 @@
+{
+  "intent": "content_unavailability",
+  "item_id": "g0120",
+  "ms": 23818,
+  "note": "artist isn't seeing the self in search, don't know what label to pick, but needs human contact for sure",
+  "reason": "angry_or_vulnerable",
+  "route": "escalate",
+  "ts": "2026-09-10T08:57:35.023Z"
+}

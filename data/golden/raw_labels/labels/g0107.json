@@ -1,0 +1,9 @@
+{
+  "intent": "account_access",
+  "item_id": "g0107",
+  "ms": 2229,
+  "note": "need atleast their account name to give them back their id",
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-17T05:47:02.156Z"
+}

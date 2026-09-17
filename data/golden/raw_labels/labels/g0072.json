@@ -1,0 +1,9 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0072",
+  "ms": 12083,
+  "note": "needs to make support ticket maybe? ",
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T13:44:11.158Z"
+}

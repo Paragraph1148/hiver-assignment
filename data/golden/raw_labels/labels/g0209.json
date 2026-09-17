@@ -1,0 +1,8 @@
+{
+  "intent": "account_access",
+  "item_id": "g0209",
+  "ms": 20262,
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T08:53:44.281Z"
+}

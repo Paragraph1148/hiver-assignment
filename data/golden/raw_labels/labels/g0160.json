@@ -1,0 +1,8 @@
+{
+  "intent": "content_unavailability",
+  "item_id": "g0160",
+  "ms": 7963,
+  "reason": "acknowledge_only",
+  "route": "auto",
+  "ts": "2026-09-10T10:47:11.880Z"
+}

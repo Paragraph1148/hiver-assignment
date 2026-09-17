@@ -1,0 +1,9 @@
+{
+  "intent": "playback_and_app_issues",
+  "item_id": "g0082",
+  "ms": 18438,
+  "note": "sha ticker should b raised to fix this issue automatically(checking previously signed tickets) ",
+  "reason": "acknowledge_only",
+  "route": "auto",
+  "ts": "2026-09-17T05:42:21.026Z"
+}

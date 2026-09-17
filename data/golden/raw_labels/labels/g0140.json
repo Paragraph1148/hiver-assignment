@@ -1,0 +1,9 @@
+{
+  "intent": "other",
+  "item_id": "g0140",
+  "ms": 32120,
+  "note": "tell them there are multiple metrics for ranking",
+  "reason": "known_answer",
+  "route": "auto",
+  "ts": "2026-09-10T08:54:35.219Z"
+}

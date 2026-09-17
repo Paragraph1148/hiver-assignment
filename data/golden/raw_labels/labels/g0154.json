@@ -1,0 +1,9 @@
+{
+  "intent": "other",
+  "item_id": "g0154",
+  "ms": 9586,
+  "note": " maybe user mistakenly used wrong name",
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T08:48:12.261Z"
+}

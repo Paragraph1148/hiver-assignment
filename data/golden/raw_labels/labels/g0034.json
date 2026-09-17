@@ -1,0 +1,8 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0034",
+  "ms": 4401,
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-10T09:46:29.578Z"
+}

@@ -1,0 +1,8 @@
+{
+  "intent": "account_access",
+  "item_id": "g0014",
+  "ms": 8152,
+  "reason": "security_or_fraud",
+  "route": "escalate",
+  "ts": "2026-09-10T13:44:51.739Z"
+}

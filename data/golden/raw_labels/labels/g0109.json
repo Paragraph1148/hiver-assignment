@@ -1,0 +1,9 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0109",
+  "ms": 9589,
+  "note": "need a quick answer from a human so they don't cancel their plan",
+  "reason": "payment_or_refund",
+  "route": "escalate",
+  "ts": "2026-09-17T05:52:35.223Z"
+}

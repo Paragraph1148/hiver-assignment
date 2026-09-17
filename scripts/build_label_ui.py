@@ -9,6 +9,7 @@ label, the region, and the brand's actual reply are all withheld: any of them
 shown on screen would anchor the annotator, and the golden set would inherit the
 clusterer's mistakes instead of checking them.
 """
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -20,9 +21,10 @@ import pandas as pd   # noqa: E402
 from hiver.schema import AUTO_REASONS, ESCALATION_REASONS, INTENTS  # noqa: E402
 
 AUTO_KEYS = ["a", "s", "d"]
-ESC_KEYS = ["z", "x", "c", "v", "b", "n", "m"]
+ESC_KEYS = ["z", "x", "c", "v", "b", "n", "m", ","]
+INTENT_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
-TEMPLATE = r"""<title>Golden Set Console</title>
+TEMPLATE = r"""<title>__TITLE__</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -75,6 +77,10 @@ main{max-width:900px;margin:0 auto;padding:16px 20px 90px}
 .msgmeta{display:flex;gap:10px;align-items:center;margin-bottom:10px}
 .pill{font-size:10px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+#prevnote{margin-top:14px;padding:9px 12px;border-left:2px solid var(--accent);
+  background:var(--raise);border-radius:0 6px 6px 0;font-size:12.5px;color:var(--muted);
+  max-width:62ch}
+#prevnote b{color:var(--ink);font-weight:600}
 .msgtext{font-size:19px;line-height:1.5;max-width:62ch;
   overflow-wrap:break-word;text-wrap:pretty}
 
@@ -146,7 +152,7 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
 <header>
   <div class="bar"><div id="prog"></div></div>
   <div class="hrow">
-    <div class="brand">Golden Set Console <span>&middot; SpotifyCares triage</span></div>
+    <div class="brand">__TITLE__ <span>&middot; __SUB__</span></div>
     <div class="stat"><b id="s-done" class="mono">0</b><i>labelled</i></div>
     <div class="stat"><b id="s-left" class="mono">0</b><i>remaining</i></div>
     <div class="stat"><b id="s-rate" class="mono">&ndash;</b><i>per min</i></div>
@@ -160,13 +166,15 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
       <div class="msgmeta">
         <span class="pill mono" id="item-id">&mdash;</span>
         <span class="pill mono" id="item-n">&mdash;</span>
+        <span class="pill" id="item-why" hidden></span>
         <span class="pill" id="item-seen" hidden>revisit</span>
       </div>
       <div class="msgtext" id="msg"></div>
+      <div id="prevnote" hidden></div>
     </div>
 
     <div class="block">
-      <div class="blabel">Intent <em>press 1&ndash;9</em></div>
+      <div class="blabel">Intent <em>press 1&ndash;0</em></div>
       <div class="grid" id="g-intent"></div>
     </div>
 
@@ -186,7 +194,7 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
 
     <div class="extras">
       <button class="mini" id="flag" aria-pressed="false">Flag as hard &middot; F</button>
-      <button class="mini" id="clear">Clear this item &middot; 0</button>
+      <button class="mini" id="clear">Clear this item &middot; Esc</button>
       <input id="note" placeholder="Optional note &mdash; why this one was tricky">
       <button class="mini" id="back">&larr; Previous</button>
       <button class="mini" id="skip">Skip &rarr;</button>
@@ -203,11 +211,11 @@ kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
 </main>
 
 <footer><div class="frow">
-  <span><b>1&ndash;9</b> intent</span>
+  <span><b>1&ndash;0</b> intent</span>
   <span><b>A S D</b> auto</span>
-  <span><b>Z X C V B N M</b> escalate</span>
+  <span><b>Z X C V B N M ,</b> escalate</span>
   <span><kbd class="lite">&#8592;</kbd> back</span>
-  <span><kbd class="lite">0</kbd> clear</span>
+  <span><kbd class="lite">Esc</kbd> clear</span>
   <span><kbd class="lite">F</kbd> flag</span>
   <span><kbd class="lite">/</kbd> note</span>
   <span class="sp mono" id="save">local only</span>
@@ -218,7 +226,8 @@ const ITEMS = __ITEMS__;
 const INTENTS = __INTENTS__;
 const AUTO = __AUTO__;
 const ESC = __ESC__;
-const LS = "hiver_golden_v1";
+const LS = "__LSKEY__";
+const COLL = "__COLL__";
 
 let labels = {};
 let i = 0, shownAt = Date.now(), db = null;
@@ -231,11 +240,11 @@ function optionHTML(o, key) {
   return `<button class="opt" data-key="${key}" aria-pressed="false">
     <kbd>${key}</kbd><span><span class="t">${o.label}</span><span class="d">${o.desc}</span></span></button>`;
 }
-$("#g-intent").innerHTML = INTENTS.map((o, n) => optionHTML(o, String(n + 1))).join("");
+$("#g-intent").innerHTML = INTENTS.map(o => optionHTML(o, o.key)).join("");
 $("#g-auto").innerHTML = AUTO.map(o => optionHTML(o, o.key)).join("");
 $("#g-esc").innerHTML = ESC.map(o => optionHTML(o, o.key)).join("");
 
-const keyToIntent = {}; INTENTS.forEach((o, n) => keyToIntent[String(n + 1)] = o.name);
+const keyToIntent = {}; INTENTS.forEach(o => keyToIntent[o.key] = o.name);
 const keyToRoute = {};
 AUTO.forEach(o => keyToRoute[o.key] = { route: "auto", reason: o.name });
 ESC.forEach(o => keyToRoute[o.key] = { route: "escalate", reason: o.name });
@@ -248,11 +257,17 @@ function render(keepTime) {
   $("#item-n").textContent = (i + 1) + " / " + ITEMS.length;
   const rec = labels[it.id];
   $("#item-seen").hidden = !rec;
+  const why = $("#item-why");
+  why.hidden = !it.why; if (it.why) why.textContent = it.why.replace("_", " ");
+  const pn = $("#prevnote");
+  pn.hidden = !it.note;
+  if (it.note) pn.innerHTML = "<b>Your note from the first pass:</b> " +
+    it.note.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
 
   document.querySelectorAll(".opt").forEach(b => b.setAttribute("aria-pressed", "false"));
   if (rec) {
-    const n = INTENTS.findIndex(o => o.name === rec.intent);
-    if (n >= 0) markKey("#g-intent", String(n + 1));
+    const hit = INTENTS.find(o => o.name === rec.intent);
+    if (hit) markKey("#g-intent", hit.key);
     const rk = Object.keys(keyToRoute).find(k => keyToRoute[k].reason === rec.reason);
     if (rk) markKey(rec.route === "auto" ? "#g-auto" : "#g-esc", rk);
   }
@@ -319,7 +334,7 @@ function clearItem() {
   cancelAdvance();
   delete labels[it.id];
   persist();
-  if (db) db.doc("labels/" + it.id).delete().catch(() => {});
+  if (db) db.doc(COLL + "/" + it.id).delete().catch(() => {});
   render(true);
   stats();
 }
@@ -328,7 +343,7 @@ let pending = 0;
 function save(rec) {
   if (!db) return;
   pending++; setSave("saving…", "warn");
-  db.doc("labels/" + rec.item_id).set(rec)
+  db.doc(COLL + "/" + rec.item_id).set(rec)
     .then(() => { pending--; if (!pending) setSave("saved", "ok"); })
     .catch(() => { pending--; setSave("save failed — kept locally", "err"); });
 }
@@ -378,7 +393,7 @@ document.addEventListener("keydown", e => {
   const k = e.key.toLowerCase();
   if (k === "arrowleft" || k === "backspace") { e.preventDefault(); cancelAdvance(); prev(); return; }
   if (k === "arrowright") { e.preventDefault(); cancelAdvance(); next(); return; }
-  if (k === "0") { e.preventDefault(); clearItem(); return; }
+  if (e.key === "Escape") { e.preventDefault(); clearItem(); return; }
   if (k === "/") { e.preventDefault(); $("#note").focus(); return; }
   if (k === "f") { e.preventDefault(); const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
     b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); return; }
@@ -413,7 +428,7 @@ render();
   if (!db) return;
   setSave("connected", "ok");
   try {
-    const snap = await db.collection("labels").get();
+    const snap = await db.collection(COLL).get();
     let merged = 0;
     snap.docs.forEach(doc => {
       const d = doc.data ? doc.data() : doc;
@@ -433,41 +448,65 @@ render();
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--queue", help="JSON list of items to review; omit for the full set")
+    ap.add_argument("--collection", default="labels", help="artifact db collection")
+    ap.add_argument("--ls-key", default="hiver_golden_v1")
+    ap.add_argument("--title", default="Golden Set Console")
+    ap.add_argument("--sub", default="SpotifyCares triage")
+    ap.add_argument("--stem", default="label_ui")
+    args = ap.parse_args()
+
     g = pd.read_parquet("data/golden/sample.parquet")
-    items = [{"id": r.item_id, "text": r.customer_text} for r in g.itertuples()]
+    text = dict(zip(g.item_id, g.customer_text))
+
+    if args.queue:
+        queue = json.loads(Path(args.queue).read_text())
+        items = [{"id": q["id"], "text": text[q["id"]], "why": q["why"],
+                  "note": q.get("note", "")} for q in queue]
+    else:
+        items = [{"id": r.item_id, "text": r.customer_text} for r in g.itertuples()]
 
     body = (TEMPLATE
             .replace("__ITEMS__", json.dumps(items, ensure_ascii=False))
             .replace("__INTENTS__", json.dumps(
-                [{"name": k, "label": k.replace("_", " "), "desc": d} for k, d in INTENTS]))
+                [{"name": k, "key": INTENT_KEYS[n], "label": k.replace("_", " "), "desc": d}
+                 for n, (k, d) in enumerate(INTENTS)]))
             .replace("__AUTO__", json.dumps(
                 [{"name": k, "key": AUTO_KEYS[n], "label": k.replace("_", " "), "desc": d}
                  for n, (k, d) in enumerate(AUTO_REASONS)]))
             .replace("__ESC__", json.dumps(
                 [{"name": k, "key": ESC_KEYS[n], "label": k.replace("_", " "), "desc": d}
-                 for n, (k, d) in enumerate(ESCALATION_REASONS)])))
+                 for n, (k, d) in enumerate(ESCALATION_REASONS)]))
+            .replace("__LSKEY__", args.ls_key)
+            .replace("__COLL__", args.collection)
+            .replace("__TITLE__", args.title)
+            .replace("__SUB__", args.sub))
+
+    assert len(INTENTS) <= len(INTENT_KEYS), "more intents than keys"
+    assert len(ESCALATION_REASONS) <= len(ESC_KEYS), "more escalation reasons than keys"
 
     out = Path("tools")
     out.mkdir(exist_ok=True)
-    (out / "label_ui.artifact.html").write_text(body)
-    (out / "label_ui.html").write_text(
+    (out / f"{args.stem}.artifact.html").write_text(body)
+    (out / f"{args.stem}.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         "</head><body>" + body + "</body></html>")
 
-    print(f"{len(items)} items embedded")
-    print(f"  tools/label_ui.artifact.html  {len(body)/1024:.0f} KB  (publish this)")
-    print(f"  tools/label_ui.html           standalone, opens from disk")
-    # The real invariant: each embedded item carries ONLY an id and the customer
-    # text. A substring scan would false-positive on intent names that legitimately
-    # contain these words (regional_and_verification contains "region").
+    print(f"{len(items)} items embedded -> tools/{args.stem}.artifact.html "
+          f"({len(body)/1024:.0f} KB), db collection {args.collection!r}")
+
+    # The annotator must never see a prior LABEL. Their own note is allowed
+    # through (it is their reasoning, not an answer), so the check is on the
+    # label-bearing fields specifically.
     embedded = json.loads(body.split("const ITEMS = ", 1)[1].split(";\n", 1)[0])
     keys = {k for it in embedded for k in it}
-    assert keys == {"id", "text"}, f"UI items carry unexpected fields: {keys - {'id', 'text'}}"
-    leaked = [r.item_id for r in g.itertuples()
-              if str(r.reply_text)[:45] and str(r.reply_text)[:45] in body]
+    banned = keys & {"intent", "route", "reason", "intent_weak", "region", "reply_text"}
+    assert not banned, f"prior labels leaked into the UI: {banned}"
+    leaked = [r.item_id for r in g.itertuples() if str(r.reply_text)[:45] in body]
     assert not leaked, f"reference replies leaked into the UI: {leaked[:3]}"
-    print(f"  leak check: items expose only {sorted(keys)}; no reference replies present")
+    print(f"  leak check: items expose {sorted(keys)}; no prior labels, no replies")
     return 0
 
 

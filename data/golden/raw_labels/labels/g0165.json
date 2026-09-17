@@ -1,0 +1,8 @@
+{
+  "intent": "non_actionable_generic",
+  "item_id": "g0165",
+  "ms": 11325,
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-10T07:42:22.895Z"
+}

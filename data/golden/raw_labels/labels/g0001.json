@@ -1,0 +1,9 @@
+{
+  "intent": "regional_and_verification",
+  "item_id": "g0001",
+  "ms": 67561,
+  "note": "Spotify unavailable in india at the time the post was written",
+  "reason": "acknowledge_only",
+  "route": "auto",
+  "ts": "2026-09-10T10:08:34.642Z"
+}

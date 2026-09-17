@@ -1,0 +1,8 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0233",
+  "ms": 52499,
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T13:45:48.916Z"
+}

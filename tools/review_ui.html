@@ -1,0 +1,421 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>Golden Set Review</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F6F8F9; --surface:#FFFFFF; --raise:#EEF2F4;
+  --ink:#101619; --muted:#5A6B74; --line:#DCE3E7;
+  --accent:#0E7C8B; --accent-soft:#DAEDF0;
+  --auto:#14795A; --auto-soft:#DDF0E7;
+  --esc:#A85A0B; --esc-soft:#FAEBDA;
+  --flag:#A32F2F; --shadow:0 1px 2px rgba(16,22,25,.06),0 4px 14px rgba(16,22,25,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0E1418; --surface:#161E23; --raise:#1D272D;
+  --ink:#E4ECF0; --muted:#8798A2; --line:#243037;
+  --accent:#3FB3C4; --accent-soft:#123038;
+  --auto:#3CBE8C; --auto-soft:#10302561;
+  --esc:#DE8C3E; --esc-soft:#33240F;
+  --flag:#E06B6B; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --ground:#0E1418; --surface:#161E23; --raise:#1D272D;
+  --ink:#E4ECF0; --muted:#8798A2; --line:#243037;
+  --accent:#3FB3C4; --accent-soft:#123038;
+  --auto:#3CBE8C; --auto-soft:#103025;
+  --esc:#DE8C3E; --esc-soft:#33240F;
+  --flag:#E06B6B; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  margin:0;padding-block:0;line-height:1.5}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+
+header{position:sticky;top:0;z-index:10;background:var(--surface);
+  border-bottom:1px solid var(--line)}
+.bar{height:3px;background:var(--raise)}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .18s ease}
+.hrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  padding:10px 20px;max-width:900px;margin:0 auto}
+.brand{font-weight:700;letter-spacing:-.01em;margin-right:auto;font-size:15px}
+.brand span{color:var(--muted);font-weight:500}
+.stat{display:flex;flex-direction:column;line-height:1.2}
+.stat b{font-size:15px;font-weight:600}
+.stat i{font-style:normal;font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em}
+
+main{max-width:900px;margin:0 auto;padding:16px 20px 90px}
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow);padding:18px 24px;margin-bottom:16px}
+.msgmeta{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pill{font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+#prevnote{margin-top:14px;padding:9px 12px;border-left:2px solid var(--accent);
+  background:var(--raise);border-radius:0 6px 6px 0;font-size:12.5px;color:var(--muted);
+  max-width:62ch}
+#prevnote b{color:var(--ink);font-weight:600}
+.msgtext{font-size:19px;line-height:1.5;max-width:62ch;
+  overflow-wrap:break-word;text-wrap:pretty}
+
+.block{margin-bottom:14px}
+.blabel{font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:9px;display:flex;gap:10px;align-items:baseline}
+.blabel em{font-style:normal;color:var(--ink);opacity:.55}
+.grid{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(215px,1fr))}
+.opt{display:flex;gap:9px;align-items:flex-start;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--line);border-radius:7px;
+  padding:7px 10px;cursor:pointer;color:inherit;font:inherit;
+  transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--accent)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt kbd{flex:none;width:19px;height:19px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:4px;background:var(--raise);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  text-transform:uppercase;color:var(--muted)}
+.opt .t{display:block;font-size:12.5px;font-weight:600;line-height:1.3}
+.opt .d{display:block;font-size:10.5px;color:var(--muted);line-height:1.3;margin-top:2px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] kbd{background:var(--accent);color:var(--surface);
+  border-color:var(--accent)}
+.g-auto .opt[aria-pressed="true"]{border-color:var(--auto);background:var(--auto-soft)}
+.g-auto .opt[aria-pressed="true"] kbd{background:var(--auto);border-color:var(--auto)}
+.g-esc .opt[aria-pressed="true"]{border-color:var(--esc);background:var(--esc-soft)}
+.g-esc .opt[aria-pressed="true"] kbd{background:var(--esc);border-color:var(--esc)}
+.route{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.route{grid-template-columns:1fr}}
+.rhead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;border-radius:99px;flex:none}
+.rhead.a{color:var(--auto)} .rhead.a .dot{background:var(--auto)}
+.rhead.e{color:var(--esc)} .rhead.e .dot{background:var(--esc)}
+.g-auto,.g-esc{grid-template-columns:1fr}
+
+.extras{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.mini{font:inherit;font-size:11.5px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+.mini:hover{border-color:var(--accent);color:var(--ink)}
+.mini:disabled{opacity:.4;cursor:default}
+.mini:disabled:hover{border-color:var(--line);color:var(--muted)}
+.mini[aria-pressed="true"]{border-color:var(--flag);color:var(--flag);font-weight:600}
+#note{flex:1;min-width:200px;font:inherit;font-size:12.5px;background:var(--surface);
+  color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+#note:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);
+  border-top:1px solid var(--line);padding:8px 20px;font-size:11px;color:var(--muted)}
+.frow{max-width:900px;margin:0 auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.frow b{color:var(--ink);font-weight:600}
+.frow .sp{margin-left:auto}
+kbd.lite{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);
+  border-radius:3px;padding:0 4px;background:var(--raise)}
+#save{font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+#save.ok{color:var(--auto)} #save.warn{color:var(--esc)} #save.err{color:var(--flag)}
+
+#done{display:none;text-align:center;padding:70px 20px}
+#done h2{font-size:26px;margin:0 0 8px}
+#done p{color:var(--muted);max-width:52ch;margin:0 auto 20px}
+#exp{width:100%;height:190px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:11px;margin-top:16px}
+.btn{font:inherit;font-size:13px;font-weight:600;background:var(--accent);
+  color:#fff;border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="bar"><div id="prog"></div></div>
+  <div class="hrow">
+    <div class="brand">Golden Set Review <span>&middot; second pass &middot; 83 items</span></div>
+    <div class="stat"><b id="s-done" class="mono">0</b><i>labelled</i></div>
+    <div class="stat"><b id="s-left" class="mono">0</b><i>remaining</i></div>
+    <div class="stat"><b id="s-rate" class="mono">&ndash;</b><i>per min</i></div>
+    <div class="stat"><b id="s-eta" class="mono">&ndash;</b><i>est. left</i></div>
+  </div>
+</header>
+
+<main>
+  <div id="work">
+    <div class="msg">
+      <div class="msgmeta">
+        <span class="pill mono" id="item-id">&mdash;</span>
+        <span class="pill mono" id="item-n">&mdash;</span>
+        <span class="pill" id="item-why" hidden></span>
+        <span class="pill" id="item-seen" hidden>revisit</span>
+      </div>
+      <div class="msgtext" id="msg"></div>
+      <div id="prevnote" hidden></div>
+    </div>
+
+    <div class="block">
+      <div class="blabel">Intent <em>press 1&ndash;0</em></div>
+      <div class="grid" id="g-intent"></div>
+    </div>
+
+    <div class="block">
+      <div class="blabel">Routing decision <em>home row auto-handles &middot; bottom row escalates</em></div>
+      <div class="route">
+        <div>
+          <div class="rhead a"><span class="dot"></span>Auto-handle</div>
+          <div class="grid g-auto" id="g-auto"></div>
+        </div>
+        <div>
+          <div class="rhead e"><span class="dot"></span>Escalate to human</div>
+          <div class="grid g-esc" id="g-esc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="extras">
+      <button class="mini" id="flag" aria-pressed="false">Flag as hard &middot; F</button>
+      <button class="mini" id="clear">Clear this item &middot; Esc</button>
+      <input id="note" placeholder="Optional note &mdash; why this one was tricky">
+      <button class="mini" id="back">&larr; Previous</button>
+      <button class="mini" id="skip">Skip &rarr;</button>
+    </div>
+  </div>
+
+  <div id="done">
+    <h2>All 0 items labelled</h2>
+    <p id="donesub"></p>
+    <button class="btn" id="copy">Copy labels to clipboard</button>
+    <button class="btn" id="dl" style="background:var(--raise);color:var(--ink)">Download JSON</button>
+    <textarea id="exp" readonly class="mono"></textarea>
+  </div>
+</main>
+
+<footer><div class="frow">
+  <span><b>1&ndash;0</b> intent</span>
+  <span><b>A S D</b> auto</span>
+  <span><b>Z X C V B N M ,</b> escalate</span>
+  <span><kbd class="lite">&#8592;</kbd> back</span>
+  <span><kbd class="lite">Esc</kbd> clear</span>
+  <span><kbd class="lite">F</kbd> flag</span>
+  <span><kbd class="lite">/</kbd> note</span>
+  <span class="sp mono" id="save">local only</span>
+</div></footer>
+
+<script>
+const ITEMS = [{"id": "g0005", "text": "@BRAND Hi, how much does it care to get your (my) artist profile verified? It's been 2/3 week since I first sended the request and I've got no email back from your team :c", "why": "overloaded", "note": "artists ask for human contact"}, {"id": "g0006", "text": "@BRAND y’all should let us see the total amount of streams of an album on the mobile version", "why": "schema_gap", "note": "feature request"}, {"id": "g0009", "text": "I hate that I pay $10 a month for @BRAND to download on my phone and on every Friday when my phone connects to the network, everything in a Spotify curated playlist gets deleted off my phone. I wonder if Apple Music does this...", "why": "relabel", "note": ""}, {"id": "g0020", "text": "@BRAND could we get a setting to block ads for horror films?don't mind ads for free acct but surprise scary ones can mess a girl up!🧡", "why": "schema_gap", "note": "asking to change ads preferences, feature request "}, {"id": "g0025", "text": "@BRAND when you wake up I'm going to need a refund", "why": "relabel", "note": ""}, {"id": "g0026", "text": "hey @BRAND i'm gonna need u guys to stop playing horror movie ads at night. i'm just tryna enjoy my \"simp/sad/feels\" playlist.", "why": "relabel", "note": ""}, {"id": "g0028", "text": "@BRAND please can you switch my USA account to be a UK account? username: ejweston *thank you!", "why": "incomplete", "note": "need a human to change their country in the account, they gave their username"}, {"id": "g0031", "text": "@BRAND thanks for your complete lack of response", "why": "overloaded", "note": "maybe need a human to finally reply, since they didn't get one previously? "}, {"id": "g0035", "text": "Hey @BRAND @BRAND What the fuck? <URL>", "why": "incomplete", "note": "need to see image url"}, {"id": "g0039", "text": "It is such a blasphemy that Spotify still doesn't have Lemonade. Hey @BRAND get your shit together it's 2017!! <URL>", "why": "relabel", "note": ""}, {"id": "g0043", "text": "@BRAND you guys need better customer service. This will be the third time I've talked to you without anyone helping me.", "why": "overloaded", "note": ""}, {"id": "g0044", "text": "Dear @BRAND you need a dislike button so I can banish any and all Chris Brown songs from popping up", "why": "schema_gap", "note": "feature request"}, {"id": "g0047", "text": "@BRAND Did the last PC update change something with the audio? I hear some instruments through just 1 ear and that has never happened before the update.", "why": "relabel", "note": ""}, {"id": "g0054", "text": "@BRAND you signed me out of my account and I can’t log back in because it’s saying “I’m abroad” when i’m not???", "why": "relabel", "note": "Spotify incorrectly labelled as abroad"}, {"id": "g0055", "text": "How does one get a live support representative from Spotify?@BRAND", "why": "overloaded", "note": "plainly asks for human, not bots"}, {"id": "g0057", "text": "@BRAND I can't believe that the family plan does not have an admin feature to block explicit content on any/all users using the account?", "why": "schema_gap", "note": "this one is feature request"}, {"id": "g0061", "text": "@BRAND PUT @<USER> and @<USER> MIXTAPE OUT NOW <URL>", "why": "incomplete", "note": "there could be any reason for song not available on Spotify, don't know which label to put in"}, {"id": "g0062", "text": "@BRAND ,when it's going to be available in Romania? 🇷🇴", "why": "relabel", "note": ""}, {"id": "g0064", "text": "petition for @BRAND to add born singer by @<USER> on spotify.", "why": "relabel", "note": ""}, {"id": "g0071", "text": "It’s 2017 and @<USER> @BRAND still didn’t figure out how to store more than 3333 songs for offline listening on your phone . #fail", "why": "schema_gap", "note": "feature request"}, {"id": "g0073", "text": "@BRAND please help. Signed up to a premium family account but the email is not going to my wife.", "why": "relabel", "note": ""}, {"id": "g0076", "text": "@BRAND somehow made the search feature worse by forcing you to sort through the album to find the song you recently played.", "why": "relabel", "note": ""}, {"id": "g0077", "text": "@BRAND I'm having issues logging in, I've DMd you the details.", "why": "incomplete", "note": "need to see dm"}, {"id": "g0078", "text": ". @BRAND needs a comments section for albums or artists or something", "why": "schema_gap", "note": "feature request "}, {"id": "g0081", "text": "@BRAND please add Boom Boom to Dinah Janes page @<USER>", "why": "incomplete", "note": ""}, {"id": "g0082", "text": "@BRAND Spotify premium app on my smart TV won't bring up the option to pull up my playlists! It's there on all my other devices.", "why": "relabel", "note": "sha ticker should b raised to fix this issue automatically(checking previously signed tickets) "}, {"id": "g0083", "text": "Can @BRAND get it together today? Your ruining my Monday morning even more", "why": "relabel", "note": ""}, {"id": "g0084", "text": "i want videos @BRAND <URL>", "why": "schema_gap", "note": "feature request"}, {"id": "g0085", "text": "@BRAND WHERE IS UNPLUGGED!!!!!! I NEED TO HEAR TYB x USE SOMEBODY", "why": "relabel", "note": ""}, {"id": "g0086", "text": "Still blows my mind that @BRAND doesn't have a \"Clean Only\" option. I would pay additional on top of my premium account for that option.", "why": "schema_gap", "note": "feature request"}, {"id": "g0090", "text": "Tfw my @BRAND playlists from when I was 21 are forever gone because some douche canoe hacked into my account <URL>", "why": "relabel", "note": "nothing wecan do, unless Spotify keeps a backup"}, {"id": "g0099", "text": "@BRAND #longlivetheonionking #introfundays #poopemoji", "why": "incomplete", "note": ""}, {"id": "g0104", "text": "Happy almost six months since I asked about this, @BRAND! <URL>", "why": "incomplete", "note": "need to see image url"}, {"id": "g0108", "text": "@BRAND You guys should have a “skip this song” or a “never play” option in playlists. So many good playlists are ruined by a couple songs.", "why": "schema_gap", "note": "feature request"}, {"id": "g0112", "text": "Man, I really wish @BRAND would have ways to connect with your friends other than Facebook. None of my friends use facebook.", "why": "schema_gap", "note": "feature request"}, {"id": "g0120", "text": "@BRAND who do I need to contact I’m not finding my name under artist search", "why": "overloaded", "note": "artist isn't seeing the self in search, don't know what label to pick, but needs human contact for sure"}, {"id": "g0122", "text": "Hey @BRAND can you make this happen? Because seriously this girl could use some help #foreveraspinster <URL>", "why": "incomplete", "note": "need to see image url"}, {"id": "g0123", "text": "@BRAND my spotify still isnt fixed. Id like to actually use the app. If it isnt working then it's just taking up space in my phone.", "why": "overloaded", "note": ""}, {"id": "g0129", "text": "@BRAND why is everything loading for ages?", "why": "relabel", "note": ""}, {"id": "g0133", "text": "@BRAND make it easier to create playlists. Make it easier to delete songs off of playlists. That is all. great job other than that", "why": "schema_gap", "note": "feature request "}, {"id": "g0134", "text": "@<USER> hiiii how could we be on a cool @BRAND rock playlist pls?", "why": "incomplete", "note": "idk what they are talking about"}, {"id": "g0139", "text": "DM@Spotify <URL>", "why": "relabel", "note": "need to see  image URL/dm"}, {"id": "g0144", "text": "@BRAND Hey! I'm trying to change my billing details for Premium but it's asking for an NUS Card which I no longer have.... <URL>", "why": "relabel", "note": ""}, {"id": "g0146", "text": "@BRAND Are Premium trials able to stream to Chromecast devices? My device is grayed out on the share menu on my iPhone.", "why": "relabel", "note": ""}, {"id": "g0148", "text": "@BRAND I seem to have been double charged for a Spotify Family membership as well as a Premium membership through Apple. Help!", "why": "relabel", "note": ""}, {"id": "g0149", "text": "Dear @BRAND that was never 30 minutes. #Spotify", "why": "incomplete", "note": "don't know what they are talking about"}, {"id": "g0150", "text": "When will @<USER> songs be on @BRAND so I can jam to them all", "why": "relabel", "note": ""}, {"id": "g0151", "text": "@BRAND I was charged twice for a student sub and I don't have premium.", "why": "relabel", "note": ""}, {"id": "g0152", "text": "@BRAND 😡 <URL>", "why": "incomplete", "note": "need to see IRL to decide what's wrong"}, {"id": "g0153", "text": "@BRAND so my account disappeared!???????", "why": "incomplete", "note": "tell Spotify got more songs or other service"}, {"id": "g0160", "text": "@BRAND where is GOT7 and GFRIEND'S LOL album on Spotify", "why": "relabel", "note": ""}, {"id": "g0162", "text": "@BRAND , we need to talk .", "why": "relabel", "note": ""}, {"id": "g0169", "text": "@BRAND can you please add the like/dislike button as standard in the song screen in the android app? so we can also like/dislike songs in discover weekly and new release radar? thanks!", "why": "schema_gap", "note": "feature request maybe"}, {"id": "g0171", "text": "@BRAND Hi! How can I get my Podcast onto Spotify so that my followers can listen on your awesome app? An I shooting for the stars or what?", "why": "schema_gap", "note": "feature request for podcasts(wasn't available on Spotify when this was posted) "}, {"id": "g0172", "text": "Hey @BRAND, how about lyrics? I’ll pay additional for that. (And no, not the Behind the Lyrics thingy)", "why": "schema_gap", "note": "feature request "}, {"id": "g0180", "text": "@BRAND i am paying for the premium service, but its not working, i cannot shuffle or forward more than 6 times, can you help please", "why": "relabel", "note": "ticket should be raised automatically for this issue"}, {"id": "g0181", "text": "Hey @<USER> I’m pretty sure that’s not her.... <URL>", "why": "incomplete", "note": "Spotify incorrectly marked an artist as some other song? need to see image url"}, {"id": "g0182", "text": "Why doesn't @BRAND have a Shazam-like plugin to listen, identify & then ADD a song to a playlist... #YoureWelcome #RoyaltiesAccepted 😉", "why": "schema_gap", "note": "feature request"}, {"id": "g0185", "text": "@BRAND Any chance you can seperate new #albumsyoumusthear from new #singles. It's the most annoying thing ever!!", "why": "incomplete", "note": "feature request maybe? "}, {"id": "g0187", "text": "👍🤛 <URL>", "why": "incomplete", "note": "need to see image url"}, {"id": "g0192", "text": "When will Reputation be put on @BRAND ?! 😩", "why": "relabel", "note": ""}, {"id": "g0194", "text": "Hey @BRAND I’ll get premium but can I get a free trial?", "why": "relabel", "note": ""}, {"id": "g0207", "text": "@BRAND I belong to premium for family, but my phone reset all the apps,I can't access to my premium acct I can't listen what I want plus I have to listen the ads.I got the invitation from My brother but when I sign in takes me to the same account. What can I do?", "why": "incomplete", "note": ""}, {"id": "g0210", "text": "@BRAND is excellent and friendly support when you need them. Keep up the good work, guys! 🙂👌", "why": "incomplete", "note": ""}, {"id": "g0211", "text": "Okay @BRAND here's a little ad strategy for you. Why play ads where the message is delivered via video on your service while only a 15 sec beat plays with no words? Assuming the goal is to deliver the message to an audience, why give video to a massively audio audience?", "why": "incomplete", "note": "the Spotify strategy is to show ads as video, no problem, user needs to know this, but safe to ignore them I guess"}, {"id": "g0212", "text": "@BRAND what even is this setting?? I have it automatically on and that terrifies me??? Am I going to be taken by a monster? Pls I’m scared <URL>", "why": "relabel", "note": "need to see image url"}, {"id": "g0213", "text": "@BRAND guys when will I be able to stream directly to my Apple Watch 3 LTE?", "why": "schema_gap", "note": "feature request "}, {"id": "g0214", "text": "LOOOOOOL thanks x <URL>", "why": "incomplete", "note": "need to see image url"}, {"id": "g0215", "text": "@BRAND take them videos off your playlist, some of us want to listen and spend copious amounts of data on videos of songs we hate", "why": "schema_gap", "note": "they don't like this feature, so there should be a feature request on this "}, {"id": "g0216", "text": "Why does @BRAND not have a song identifying tool? It could take you directly to stream the single or album. It becomes more convenient to add it to a playlist. People are encouraged to use the platform even when they're not listening to music. I am lazy. Please hurry.", "why": "incomplete", "note": "feature request "}, {"id": "g0217", "text": "@BRAND pls increase the downloaded song cap. This is such a struggle. I’d pay $ for more songs! Thanks @<USER> for the rec via IG! <URL>", "why": "schema_gap", "note": "feature request"}, {"id": "g0219", "text": "@BRAND How bout you acquire streaming to the #AppleWatchSeries3 <URL>", "why": "incomplete", "note": "its a feature request on supporting apple watch series 3"}, {"id": "g0221", "text": "When the #Reputation will be on @BRAND?? I can't wait, rlly. @<USER> please make up your mind and give us the perfection we are waiting for.", "why": "relabel", "note": ""}, {"id": "g0223", "text": "@BRAND i wanna sync this song from local files but why there is no album artawork like this. While in mu pc have the artwork. <URL>", "why": "schema_gap", "note": "asking if feature is available or not"}, {"id": "g0224", "text": "@<USER> did you guys remove the equalizer feature on the iPhone App?", "why": "incomplete", "note": "rasked if we removed feature"}, {"id": "g0226", "text": "Humble request for @BRAND- add a feature that allows me to select a song, and see user created playlists that it belongs to. I feel like that'd be a perfect way to discover new music I would like.", "why": "schema_gap", "note": "feature request"}, {"id": "g0227", "text": "@BRAND Can you please answer my DM? Thanks", "why": "overloaded", "note": "asks for human contact"}, {"id": "g0228", "text": "@BRAND i am part of a family sub and am also being charged an additional 9.99 on my credit card name is __email__", "why": "relabel", "note": ""}, {"id": "g0229", "text": "Dude... change it to your 3 months for 99 cents deal. That's literally the best deal of existence @BRAND @BRAND <URL>", "why": "incomplete", "note": "not asking, but recommending to someone else to use a specific deal"}, {"id": "g0231", "text": "I’m just gonna have to cancel service @BRAND cause it’s really annoying not being able to multitask while using yalls app", "why": "relabel", "note": "app kills itself in background"}, {"id": "g0237", "text": "@BRAND both my iphone app and my web app just start playing whenever they feel like it right now, can you help? Noticed it the last 4 days", "why": "relabel", "note": ""}, {"id": "g0241", "text": "When you have @BRAND premium and follow @<USER>, but haven’t gotten a presale code yet & tickets went on sale. Help?", "why": "incomplete", "note": "does Spotify premium have tickets support? "}, {"id": "g0243", "text": "@BRAND sort your shit out man don’t have premium for you to not even let me on the app", "why": "relabel", "note": ""}];
+const INTENTS = [{"name": "billing_and_subscription", "key": "1", "label": "billing and subscription", "desc": "Payment, charges, plan changes, refunds, student/family pricing"}, {"name": "account_access", "key": "2", "label": "account access", "desc": "Login, password, recovery, deletion, linked accounts, security"}, {"name": "playback_and_app_issues", "key": "3", "label": "playback and app issues", "desc": "App crashes, songs won't play, sync, device/connectivity problems"}, {"name": "content_unavailability", "key": "4", "label": "content unavailability", "desc": "Missing tracks/albums/artists, removed content, add-to-catalogue requests"}, {"name": "playlist_and_discovery", "key": "5", "label": "playlist and discovery", "desc": "Playlist tooling, recommendations, podcasts, discovery features"}, {"name": "regional_and_verification", "key": "6", "label": "regional and verification", "desc": "Country availability, launch requests, student/identity verification"}, {"name": "non_actionable_generic", "key": "7", "label": "non actionable generic", "desc": "No problem described - just 'help' or a bare link"}, {"name": "ads_issues", "key": "8", "label": "ads issues", "desc": "Ad frequency, ad content, ads despite Premium"}, {"name": "feature_request", "key": "9", "label": "feature request", "desc": "Wants a new feature, or asks whether one exists or was removed"}, {"name": "other", "key": "0", "label": "other", "desc": "A real request that fits none of the above"}];
+const AUTO = [{"name": "known_answer", "key": "a", "label": "known answer", "desc": "A documented answer or standard fix applies"}, {"name": "triage_question", "key": "s", "label": "triage question", "desc": "Correct reply is a clarifying question, safe to send"}, {"name": "acknowledge_only", "key": "d", "label": "acknowledge only", "desc": "Feedback or praise; a courteous acknowledgement suffices"}];
+const ESC = [{"name": "needs_account_access", "key": "z", "label": "needs account access", "desc": "Cannot be resolved without looking inside the account"}, {"name": "payment_or_refund", "key": "x", "label": "payment or refund", "desc": "Requires moving money or changing a subscription"}, {"name": "security_or_fraud", "key": "c", "label": "security or fraud", "desc": "Suspected compromise, unauthorised access or fraud"}, {"name": "insufficient_info", "key": "v", "label": "insufficient info", "desc": "Not answerable until the customer supplies more detail"}, {"name": "asks_for_human", "key": "b", "label": "asks for human", "desc": "Explicitly asks to reach a person rather than a bot or a form"}, {"name": "angry_or_vulnerable", "key": "n", "label": "angry or vulnerable", "desc": "Genuine distress or hostility, beyond ordinary frustration"}, {"name": "policy_or_legal", "key": "m", "label": "policy or legal", "desc": "Legal threat, press, formal complaint or policy exception"}, {"name": "out_of_scope", "key": ",", "label": "out of scope", "desc": "Not a support request Spotify can act on"}];
+const LS = "hiver_golden_v2";
+const COLL = "labels_v2";
+
+let labels = {};
+let i = 0, shownAt = Date.now(), db = null;
+try { labels = JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { labels = {}; }
+
+const $ = s => document.querySelector(s);
+const cur = () => ITEMS[i];
+
+function optionHTML(o, key) {
+  return `<button class="opt" data-key="${key}" aria-pressed="false">
+    <kbd>${key}</kbd><span><span class="t">${o.label}</span><span class="d">${o.desc}</span></span></button>`;
+}
+$("#g-intent").innerHTML = INTENTS.map(o => optionHTML(o, o.key)).join("");
+$("#g-auto").innerHTML = AUTO.map(o => optionHTML(o, o.key)).join("");
+$("#g-esc").innerHTML = ESC.map(o => optionHTML(o, o.key)).join("");
+
+const keyToIntent = {}; INTENTS.forEach(o => keyToIntent[o.key] = o.name);
+const keyToRoute = {};
+AUTO.forEach(o => keyToRoute[o.key] = { route: "auto", reason: o.name });
+ESC.forEach(o => keyToRoute[o.key] = { route: "escalate", reason: o.name });
+
+function render(keepTime) {
+  const it = cur();
+  if (!it) return finish();
+  $("#msg").textContent = it.text;
+  $("#item-id").textContent = it.id;
+  $("#item-n").textContent = (i + 1) + " / " + ITEMS.length;
+  const rec = labels[it.id];
+  $("#item-seen").hidden = !rec;
+  const why = $("#item-why");
+  why.hidden = !it.why; if (it.why) why.textContent = it.why.replace("_", " ");
+  const pn = $("#prevnote");
+  pn.hidden = !it.note;
+  if (it.note) pn.innerHTML = "<b>Your note from the first pass:</b> " +
+    it.note.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+
+  document.querySelectorAll(".opt").forEach(b => b.setAttribute("aria-pressed", "false"));
+  if (rec) {
+    const hit = INTENTS.find(o => o.name === rec.intent);
+    if (hit) markKey("#g-intent", hit.key);
+    const rk = Object.keys(keyToRoute).find(k => keyToRoute[k].reason === rec.reason);
+    if (rk) markKey(rec.route === "auto" ? "#g-auto" : "#g-esc", rk);
+  }
+  $("#flag").setAttribute("aria-pressed", rec && rec.flagged ? "true" : "false");
+  $("#note").value = (rec && rec.note) || "";
+  $("#clear").disabled = !rec;
+  if (!keepTime) shownAt = Date.now();
+  stats();
+}
+
+function markKey(scope, key) {
+  const b = document.querySelector(`${scope} .opt[data-key="${key}"]`);
+  if (b) b.setAttribute("aria-pressed", "true");
+}
+
+function stats() {
+  const done = Object.keys(labels).length, total = ITEMS.length;
+  $("#s-done").textContent = done;
+  $("#s-left").textContent = total - done;
+  $("#prog").style.width = (done / total * 100) + "%";
+  const times = Object.values(labels).map(r => r.ms).filter(Boolean);
+  if (times.length >= 3) {
+    const med = times.slice().sort((a, b) => a - b)[Math.floor(times.length / 2)];
+    const perMin = 60000 / med;
+    $("#s-rate").textContent = perMin.toFixed(1);
+    const mins = Math.round((total - done) / perMin);
+    $("#s-eta").textContent = mins >= 60 ? Math.floor(mins / 60) + "h " + (mins % 60) + "m" : mins + "m";
+  }
+}
+
+function persist() {
+  try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+}
+
+let advanceTimer = null;
+function cancelAdvance() { clearTimeout(advanceTimer); advanceTimer = null; }
+
+function put(patch, opts) {
+  opts = opts || {};
+  const it = cur(); if (!it) return;
+  const prev = labels[it.id] || {};
+  const wasComplete = !!(prev.intent && prev.route);
+  const rec = Object.assign({ item_id: it.id }, prev, patch);
+  // An explicit null clears the field rather than storing null.
+  Object.keys(patch).forEach(k => { if (patch[k] === null) delete rec[k]; });
+  if (!prev.intent && patch.intent) rec.ms = Date.now() - shownAt;
+  rec.ts = new Date().toISOString();
+  labels[it.id] = rec;
+  persist();
+  save(rec);
+  render(true);
+  // Advance only when this keypress COMPLETED the item. Revisiting a finished
+  // one to correct it must never whisk the annotator away mid-correction.
+  if (!wasComplete && rec.intent && rec.route && !opts.noAdvance) {
+    cancelAdvance();
+    advanceTimer = setTimeout(() => {
+      if (cur() && cur().id === rec.item_id) next();
+    }, 420);
+  }
+}
+
+function clearItem() {
+  const it = cur(); if (!it) return;
+  cancelAdvance();
+  delete labels[it.id];
+  persist();
+  if (db) db.doc(COLL + "/" + it.id).delete().catch(() => {});
+  render(true);
+  stats();
+}
+
+let pending = 0;
+function save(rec) {
+  if (!db) return;
+  pending++; setSave("saving…", "warn");
+  db.doc(COLL + "/" + rec.item_id).set(rec)
+    .then(() => { pending--; if (!pending) setSave("saved", "ok"); })
+    .catch(() => { pending--; setSave("save failed — kept locally", "err"); });
+}
+function setSave(t, c) { const e = $("#save"); e.textContent = t; e.className = "mono " + c; }
+
+function next() { i = Math.min(i + 1, ITEMS.length); render(); }
+function prev() { i = Math.max(i - 1, 0); render(); }
+
+function finish() {
+  $("#work").style.display = "none";
+  const d = $("#done"); d.style.display = "block";
+  const n = Object.keys(labels).length;
+  const esc = Object.values(labels).filter(r => r.route === "escalate").length;
+  const fl = Object.values(labels).filter(r => r.flagged).length;
+  d.querySelector("h2").textContent = "All " + n + " items labelled";
+  $("#donesub").textContent = esc + " escalate, " + (n - esc) + " auto-handle, " + fl +
+    " flagged as hard. Labels are saved; you can close this page.";
+  $("#exp").value = JSON.stringify(Object.values(labels), null, 1);
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if (!b) return;
+  const key = b.dataset.key;
+  if (b.closest("#g-intent")) apply(key); else apply(key);
+});
+
+function apply(key) {
+  cancelAdvance();
+  const it = cur(); if (!it) return;
+  const rec = labels[it.id] || {};
+  if (keyToIntent[key] && document.querySelector(`#g-intent .opt[data-key="${key}"]`)) {
+    const same = rec.intent === keyToIntent[key];
+    put({ intent: same ? null : keyToIntent[key] }, { noAdvance: same });
+    return;
+  }
+  const r = keyToRoute[key];
+  if (r) {
+    const same = rec.route === r.route && rec.reason === r.reason;
+    put(same ? { route: null, reason: null } : { route: r.route, reason: r.reason },
+        { noAdvance: same });
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.target === $("#note")) { if (e.key === "Enter" || e.key === "Escape") { put({ note: $("#note").value }); $("#note").blur(); } return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "arrowleft" || k === "backspace") { e.preventDefault(); cancelAdvance(); prev(); return; }
+  if (k === "arrowright") { e.preventDefault(); cancelAdvance(); next(); return; }
+  if (e.key === "Escape") { e.preventDefault(); clearItem(); return; }
+  if (k === "/") { e.preventDefault(); $("#note").focus(); return; }
+  if (k === "f") { e.preventDefault(); const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); return; }
+  if (keyToIntent[k] || keyToRoute[k]) { e.preventDefault(); apply(k); }
+});
+
+$("#flag").onclick = () => { const b = $("#flag"); const v = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", v ? "true" : "false"); put({ flagged: v }); };
+$("#clear").onclick = clearItem;
+$("#back").onclick = () => { cancelAdvance(); prev(); };
+$("#skip").onclick = () => { cancelAdvance(); next(); };
+$("#note").onblur = () => put({ note: $("#note").value });
+$("#copy").onclick = () => { navigator.clipboard.writeText($("#exp").value)
+  .then(() => $("#copy").textContent = "Copied").catch(() => $("#exp").select()); };
+$("#dl").onclick = async () => {
+  const d = await (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+  if (!d) { $("#exp").select(); $("#dl").textContent = "Select the text and copy instead"; return; }
+  try { await d.save({ filename: "golden_labels.json", data: $("#exp").value }); }
+  catch (err) { $("#dl").textContent = "Download declined"; }
+};
+
+// Resume at the first unlabelled item.
+const firstOpen = ITEMS.findIndex(it => !labels[it.id]);
+i = firstOpen < 0 ? ITEMS.length : firstOpen;
+render();
+
+// db is optional: the page is fully usable on localStorage alone, and lights up
+// server-side saving only if the capability resolves.
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  db = await window.claude.use("db");
+  if (!db) return;
+  setSave("connected", "ok");
+  try {
+    const snap = await db.collection(COLL).get();
+    let merged = 0;
+    snap.docs.forEach(doc => {
+      const d = doc.data ? doc.data() : doc;
+      if (d && d.item_id && !labels[d.item_id]) { labels[d.item_id] = d; merged++; }
+    });
+    if (merged) {
+      try { localStorage.setItem(LS, JSON.stringify(labels)); } catch (e) {}
+      const f = ITEMS.findIndex(it => !labels[it.id]);
+      i = f < 0 ? ITEMS.length : f;
+      render();
+    }
+    stats();
+  } catch (e) { setSave("offline — saving locally", "warn"); }
+})();
+</script>
+</body></html>

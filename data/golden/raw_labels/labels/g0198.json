@@ -1,0 +1,9 @@
+{
+  "intent": "ads_issues",
+  "item_id": "g0198",
+  "ms": 13550,
+  "note": "user needs to tell id",
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T08:49:48.030Z"
+}

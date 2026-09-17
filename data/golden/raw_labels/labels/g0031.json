@@ -1,0 +1,9 @@
+{
+  "intent": "non_actionable_generic",
+  "item_id": "g0031",
+  "ms": 4999,
+  "note": "maybe need a human to finally reply, since they didn't get one previously? ",
+  "reason": "angry_or_vulnerable",
+  "route": "escalate",
+  "ts": "2026-09-17T05:55:24.128Z"
+}

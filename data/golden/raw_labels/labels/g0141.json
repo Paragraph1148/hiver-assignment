@@ -1,0 +1,9 @@
+{
+  "intent": "playback_and_app_issues",
+  "item_id": "g0141",
+  "ms": 5705,
+  "note": "need to see image, but most probably they have some issue with app",
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-17T06:03:54.563Z"
+}

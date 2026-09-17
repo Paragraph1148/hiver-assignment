@@ -1,0 +1,9 @@
+{
+  "intent": "account_access",
+  "item_id": "g0049",
+  "ms": 17467,
+  "note": "need account handle",
+  "reason": "insufficient_info",
+  "route": "escalate",
+  "ts": "2026-09-10T13:38:20.798Z"
+}

@@ -1,0 +1,9 @@
+{
+  "intent": "non_actionable_generic",
+  "item_id": "g0227",
+  "ms": 6262,
+  "note": "asks for human contact",
+  "reason": "angry_or_vulnerable",
+  "route": "escalate",
+  "ts": "2026-09-10T10:18:21.125Z"
+}

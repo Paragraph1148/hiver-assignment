@@ -1,4 +1,22 @@
-"""The label schema. Single source of truth for the pre-filler, the UI and eval.
+"""The label schema. Single source of truth for the UI and the evaluation.
+
+Two categories were added after the first annotation pass, both because the
+annotator's notes showed the schema could not express what they were seeing:
+
+  feature_request  - 24 notes said "feature request". The clustering had in fact
+      proposed this intent at ~9.9% before a merge pass dissolved it into
+      playback and playlist. Hand-labelling independently recovered a real class
+      that automated taxonomy induction had thrown away.
+
+  asks_for_human   - 8 notes said the customer plainly wanted a person. With no
+      category for it the annotator reached for angry_or_vulnerable, which
+      overloaded that label with messages carrying no anger at all. Wanting a
+      human is operationally distinct: it is an escalation trigger on its own,
+      whatever the intent, and it leaves angry_or_vulnerable for real distress.
+
+Both are schema defects found by the human pass, not annotator errors, so they
+are fixed in the schema and the affected items are relabelled - never patched by
+rewriting the annotator's judgement.
 
 Escalation is defined as a decision made from the CUSTOMER MESSAGE ALONE, which
 is the information a live agent has before replying. Each reason names a
@@ -17,6 +35,7 @@ INTENTS: list[tuple[str, str]] = [
     ("regional_and_verification", "Country availability, launch requests, student/identity verification"),
     ("non_actionable_generic",   "No problem described - just 'help' or a bare link"),
     ("ads_issues",               "Ad frequency, ad content, ads despite Premium"),
+    ("feature_request",          "Wants a new feature, or asks whether one exists or was removed"),
     ("other",                    "A real request that fits none of the above"),
 ]
 
@@ -25,7 +44,8 @@ ESCALATION_REASONS: list[tuple[str, str]] = [
     ("payment_or_refund",    "Requires moving money or changing a subscription"),
     ("security_or_fraud",    "Suspected compromise, unauthorised access or fraud"),
     ("insufficient_info",    "Not answerable until the customer supplies more detail"),
-    ("angry_or_vulnerable",  "Tone or circumstances warrant a human touch"),
+    ("asks_for_human",       "Explicitly asks to reach a person rather than a bot or a form"),
+    ("angry_or_vulnerable",  "Genuine distress or hostility, beyond ordinary frustration"),
     ("policy_or_legal",      "Legal threat, press, formal complaint or policy exception"),
     ("out_of_scope",         "Not a support request Spotify can act on"),
 ]

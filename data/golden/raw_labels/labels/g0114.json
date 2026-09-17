@@ -1,0 +1,9 @@
+{
+  "intent": "account_access",
+  "item_id": "g0114",
+  "ms": 9795,
+  "note": "can't know what they are talking about unless we see image",
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-10T09:45:26.634Z"
+}

@@ -1,0 +1,9 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0230",
+  "ms": 22034,
+  "note": "the redirection should be information they need, otherwise requires human touch(depends on uRL) ",
+  "reason": "known_answer",
+  "route": "auto",
+  "ts": "2026-09-10T08:58:49.589Z"
+}
