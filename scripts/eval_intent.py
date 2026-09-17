@@ -58,6 +58,16 @@ def main() -> int:
         print(f"  {name:<26}{str(acc):<26}{wacc.point*100:>9.1f}%{f1.point*100:>9.1f}%")
     print(f"\n  {'annotator self-consistency':<26}{CEILING*100:>5.1f}%   "
           f"<- the measurement ceiling, not a model")
+    if "llm" in rows:
+        a = rows["llm"]
+        at_ceiling = a.lo <= CEILING <= a.hi
+        gap = CEILING - a.point
+        print(f"  {'gap to ceiling':<26}{gap*100:>5.1f} pts   "
+              + ("the CI CONTAINS the ceiling: the system is statistically "
+                 "indistinguishable\n" + " " * 34 + "from the annotator's own "
+                 "self-consistency, so this test set\n" + " " * 34 + "can no "
+                 "longer tell them apart." if at_ceiling else
+                 "significantly below the ceiling"))
 
     print("\nPAIRED COMPARISON (difference in accuracy, same items resampled)")
     if "llm" in p.columns:
