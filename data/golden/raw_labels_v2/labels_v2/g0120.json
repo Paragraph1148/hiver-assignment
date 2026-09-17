@@ -1,0 +1,8 @@
+{
+  "intent": "content_unavailability",
+  "item_id": "g0120",
+  "ms": 25111,
+  "reason": "asks_for_human",
+  "route": "escalate",
+  "ts": "2026-09-17T07:26:22.386Z"
+}

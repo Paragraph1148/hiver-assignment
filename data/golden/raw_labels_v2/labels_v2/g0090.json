@@ -1,0 +1,9 @@
+{
+  "flagged": true,
+  "intent": "non_actionable_generic",
+  "item_id": "g0090",
+  "ms": 15385,
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-17T07:25:16.667Z"
+}

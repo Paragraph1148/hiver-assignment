@@ -1,0 +1,8 @@
+{
+  "intent": "playback_and_app_issues",
+  "item_id": "g0123",
+  "ms": 27209,
+  "reason": "triage_question",
+  "route": "auto",
+  "ts": "2026-09-17T07:27:03.315Z"
+}

@@ -1,0 +1,8 @@
+{
+  "intent": "billing_and_subscription",
+  "item_id": "g0028",
+  "ms": 11440,
+  "reason": "asks_for_human",
+  "route": "escalate",
+  "ts": "2026-09-17T07:20:10.976Z"
+}

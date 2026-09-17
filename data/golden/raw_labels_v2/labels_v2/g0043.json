@@ -1,0 +1,8 @@
+{
+  "intent": "non_actionable_generic",
+  "item_id": "g0043",
+  "ms": 7087,
+  "reason": "asks_for_human",
+  "route": "escalate",
+  "ts": "2026-09-17T07:21:02.566Z"
+}
