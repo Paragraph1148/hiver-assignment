@@ -26,9 +26,14 @@ INTENT_NAMES = [k for k, _ in INTENTS]
 
 @dataclass
 class Prediction:
-    intent: str
+    intent: str | None
     confidence: float
     source: str = ""
+    failed: bool = False       # the call did not complete; NOT a model answer
+
+    @property
+    def ok(self) -> bool:
+        return not self.failed and self.intent is not None
 
 
 class MajorityClassifier:
@@ -150,11 +155,19 @@ class LlmClassifier:
                 r = self.llm.chat([Message("system", self._system()), Message("user", user)],
                                   json_mode=True, max_tokens=4000)
                 d = r.json()
-                intent = d.get("intent", "other")
+                intent = d.get("intent")
                 conf = float(d.get("confidence", 0.5))
-            except Exception:
-                intent, conf = "other", 0.0
+            except Exception as e:
+                # An infrastructure failure is NOT a model answer. Recording it
+                # as one ("other", 0.0) silently converts an outage into a wrong
+                # prediction and depresses the headline number - which is exactly
+                # what happened on the first run, where 17 rate-limited calls
+                # were scored as errors the model never made.
+                out.append(Prediction(None, 0.0, source=type(e).__name__, failed=True))
+                continue
             if intent not in INTENT_NAMES:
+                # A well-formed reply naming an unknown class IS a model answer,
+                # and an honest one to score: it fell back to `other` on purpose.
                 intent, conf = "other", min(conf, 0.3)
             out.append(Prediction(intent, max(0.0, min(1.0, conf))))
             if progress and (n + 1) % 25 == 0:

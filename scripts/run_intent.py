@@ -63,9 +63,15 @@ def main() -> int:
             p = clf.predict(texts, vectors=vecs, progress=True)
             preds[key] = [x.intent for x in p]
             preds[f"{key}_conf"] = [x.confidence for x in p]
+            preds[f"{key}_failed"] = [x.failed for x in p]
+            n_fail = sum(x.failed for x in p)
             print(f"    done in {time.time()-t0:.0f}s | "
-                  f"cache hits {llm.cache.stats.hits}, misses {llm.cache.stats.misses}",
-                  flush=True)
+                  f"cache hits {llm.cache.stats.hits}, misses {llm.cache.stats.misses} | "
+                  f"failed calls {n_fail}", flush=True)
+            if n_fail:
+                print(f"    !! {n_fail} calls did not complete. They are marked failed, "
+                      f"NOT scored as wrong answers. Re-run to fill them from cache.",
+                      flush=True)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

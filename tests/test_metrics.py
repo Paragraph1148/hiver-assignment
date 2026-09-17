@@ -73,3 +73,15 @@ def test_deferral_curve_is_monotone_in_coverage():
     assert cov == sorted(cov) and cov[-1] == pytest.approx(1.0)
     # Accuracy at low coverage should beat accuracy at full coverage.
     assert curve[0][1] > curve[-1][1]
+
+
+def test_failed_prediction_is_not_a_model_answer():
+    """Regression: an exception used to be recorded as Prediction('other', 0.0),
+    so 17 rate-limited calls were scored as wrong answers the model never gave.
+    A failure must be distinguishable from a real prediction."""
+    from hiver.classify import Prediction
+
+    real = Prediction("other", 0.0)
+    broke = Prediction(None, 0.0, source="ProviderError", failed=True)
+    assert real.ok and not broke.ok
+    assert real.intent == "other" and broke.intent is None

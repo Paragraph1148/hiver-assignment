@@ -31,6 +31,17 @@ MODELS = [("majority", "trivial: majority class"),
 
 def main() -> int:
     p = pd.read_parquet("data/results/intent_preds.parquet")
+
+    # A call that never completed is not a prediction. Scoring it as a wrong
+    # answer turns provider downtime into an apparent model weakness, so the
+    # rows are reported and excluded rather than silently counted.
+    fail_cols = [c for c in p.columns if c.endswith("_failed")]
+    failed = p[fail_cols].any(axis=1) if fail_cols else pd.Series(False, index=p.index)
+    if failed.any():
+        print(f"!! {int(failed.sum())} of {len(p)} items had a call that did not "
+              f"complete; excluded from every figure below.\n")
+        p = p[~failed].reset_index(drop=True)
+
     gold = p.gold.to_numpy()
     w = p.weight.to_numpy()
     present = [(k, n) for k, n in MODELS if k in p.columns]

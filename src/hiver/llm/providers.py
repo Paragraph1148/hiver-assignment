@@ -23,7 +23,7 @@ import httpx
 from .base import ChatRequest, ChatResponse, ProviderError
 
 RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
-MAX_ATTEMPTS = 5
+MAX_ATTEMPTS = 8
 
 
 class BaseProvider:
@@ -87,9 +87,10 @@ class BaseProvider:
                 return
             except ValueError:
                 pass
-        # Full jitter: avoids a thundering herd when several workers hit the
-        # same per-minute token bucket, which free tiers make easy to do.
-        time.sleep(random.uniform(0, min(2.0 * (2 ** attempt), 30.0)))
+        # Full jitter, capped at a minute: free-tier buckets refill per minute,
+        # so a ceiling below that guarantees the retry lands in the same
+        # exhausted window and burns an attempt for nothing.
+        time.sleep(random.uniform(0, min(2.0 * (2 ** attempt), 60.0)))
 
 
 class OpenAICompat(BaseProvider):
