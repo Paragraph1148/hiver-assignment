@@ -1,0 +1,105 @@
+{
+  "hit_rate_on_traffic": {
+    "0.99": {
+      "hit_rate": 0.0063,
+      "hits": 63,
+      "mismatch": 0.0
+    },
+    "0.97": {
+      "hit_rate": 0.01,
+      "hits": 100,
+      "mismatch": 0.0
+    },
+    "0.95": {
+      "hit_rate": 0.0147,
+      "hits": 147,
+      "mismatch": 0.0
+    },
+    "0.92": {
+      "hit_rate": 0.0304,
+      "hits": 304,
+      "mismatch": 0.009868421052631578
+    },
+    "0.9": {
+      "hit_rate": 0.046,
+      "hits": 460,
+      "mismatch": 0.010869565217391304
+    },
+    "0.85": {
+      "hit_rate": 0.1237,
+      "hits": 1237,
+      "mismatch": 0.025869037995149554
+    },
+    "0.8": {
+      "hit_rate": 0.2527,
+      "hits": 2527,
+      "mismatch": 0.0664819944598338
+    }
+  },
+  "golden_simulation": [
+    {
+      "threshold": 0.99,
+      "hit_rate": 0.0,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 0,
+      "entries": 249
+    },
+    {
+      "threshold": 0.97,
+      "hit_rate": 0.0,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 0,
+      "entries": 249
+    },
+    {
+      "threshold": 0.95,
+      "hit_rate": 0.0,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 0,
+      "entries": 249
+    },
+    {
+      "threshold": 0.92,
+      "hit_rate": 0.0,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 0,
+      "entries": 249
+    },
+    {
+      "threshold": 0.9,
+      "hit_rate": 0.004016064257028112,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 1,
+      "entries": 248
+    },
+    {
+      "threshold": 0.85,
+      "hit_rate": 0.008032128514056224,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 2,
+      "entries": 247
+    },
+    {
+      "threshold": 0.8,
+      "hit_rate": 0.03614457831325301,
+      "accuracy": 0.6907630522088354,
+      "accuracy_no_cache": 0.6907630522088354,
+      "cost_of_cache_pts": 0.0,
+      "calls_saved": 9,
+      "entries": 240
+    }
+  ],
+  "stream_n": 10000
+}
