@@ -2,7 +2,7 @@
 name = "hiver-support-agent"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["pandas", "pyarrow", "httpx"]
+dependencies = ["pandas", "pyarrow", "httpx", "numpy", "scikit-learn"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
