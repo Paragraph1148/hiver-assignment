@@ -90,7 +90,7 @@ class IntentPriorRouter:
         return out
 
 
-SYS = """You decide whether an incoming Spotify support tweet can be answered
+SYS_V1 = """You decide whether an incoming Spotify support tweet can be answered
 automatically or must go to a human agent. Decide from the customer's message
 alone - that is all a live agent has before replying.
 
@@ -109,16 +109,60 @@ risk is the probability that auto-sending would be wrong or harmful. Use the
 full range - it sets the operating point, so a flat 0.5 is useless."""
 
 
+SYS = """You decide whether an incoming Spotify support tweet can be answered
+automatically or must go to a human agent. Decide from the customer's message
+alone - that is all a live agent has before replying.
+
+Escalate when a reply cannot be sent safely without a person. Reasons:
+{esc}
+
+Auto-handle when a safe, useful reply can be sent now. Reasons:
+{auto}
+
+A clarifying question IS a safe automatic reply when the only thing missing is
+detail: not knowing which device, which song or which error is a reason to ask,
+not a reason to escalate.
+
+But some situations are escalations NO MATTER how much detail is missing, and a
+clarifying question does not make them safe. Escalate immediately, without
+asking anything first, whenever the message involves:
+  - money already taken: a disputed charge, a double charge, a refund
+  - account takeover, a stolen account, or a login the customer did not make
+  - anyone claiming legal action, press, or a regulator
+Asking "which card was it?" when someone has just been overcharged, or "what
+happened?" when someone's account has been stolen, is not triage - it is delay
+on exactly the cases where delay costs most.
+
+Return JSON only:
+{{"escalate":<true|false>,"reason":"<exact name>","risk":<0.0-1.0>,"why":"<max 12 words>"}}
+risk is the probability that auto-sending would be wrong or harmful. Use the
+full range - it sets the operating point, so a flat 0.5 is useless."""
+
+
 class LlmRouter:
+    """Policy router.
+
+    The prompt carries an explicit carve-out for money, account takeover and
+    legal exposure. Version 1 said only that a clarifying question is always a
+    safe auto-reply, and the evaluation caught what that cost: 28 of 37 missed
+    escalations were routed to `triage_question`, including account takeovers
+    and double charges. The model followed the instruction faithfully; the
+    instruction was wrong. Both versions are kept so the fix stays measurable.
+    """
     name = "system: LLM policy router"
 
-    def __init__(self, llm: LLM, index=None, k: int = 4):
+    def __init__(self, llm: LLM, index=None, k: int = 4, prompt_version: int = 2):
         self.llm, self.index, self.k = llm, index, k
+        self.prompt_version = prompt_version
 
     def fit(self, *a, **kw):
         return self
 
     def _system(self) -> str:
+        if self.prompt_version == 1:
+            return SYS_V1.format(
+                esc="\n".join(f"  {k} - {d}" for k, d in ESCALATION_REASONS),
+                auto="\n".join(f"  {k} - {d}" for k, d in AUTO_REASONS))
         return SYS.format(
             esc="\n".join(f"  {k} - {d}" for k, d in ESCALATION_REASONS),
             auto="\n".join(f"  {k} - {d}" for k, d in AUTO_REASONS))
