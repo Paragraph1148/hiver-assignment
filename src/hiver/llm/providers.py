@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 import random
+import re
 import time
 from typing import Any
 
@@ -28,13 +29,27 @@ MAX_ATTEMPTS = 8
 # limit that clears: a daily quota exhaustion returns the same status and never
 # clears, and without a deadline the backoff loop will sit on it indefinitely.
 # A run once spent 2h45m retrying an exhausted Gemini quota, producing nothing.
-RETRY_DEADLINE_S = 180.0
+RETRY_DEADLINE_S = 300.0
+
+# Providers put the wait in different places. Gemini returns no retry-after
+# header but writes "Please retry in 35.7s" into the error body, and its free
+# tier is a handful of requests per minute - so honouring that number is the
+# difference between progress and a backoff loop that never syncs with the
+# refill window.
+_RETRY_IN = re.compile(r"retry in ([0-9.]+)s", re.I)
+_RETRY_DELAY = re.compile(r'"retryDelay"\s*:\s*"([0-9.]+)s"', re.I)
 
 
 class BaseProvider:
     name: str = "base"
     default_model: str = ""
     env_key: str = ""
+
+    # Minimum seconds between requests. Staying under the published limit beats
+    # discovering it: a 429 costs a full retry window, a short wait costs the
+    # wait. Set per provider from its free-tier rate.
+    min_interval_s: float = 0.0
+    _last_call: float = 0.0
 
     def __init__(self, api_key: str | None = None, model: str | None = None,
                  base_url: str | None = None, timeout: float = 120.0):
@@ -62,6 +77,11 @@ class BaseProvider:
         last: Exception | None = None
 
         for attempt in range(MAX_ATTEMPTS):
+            if self.min_interval_s:
+                gap = time.monotonic() - type(self)._last_call
+                if gap < self.min_interval_s:
+                    time.sleep(self.min_interval_s - gap)
+                type(self)._last_call = time.monotonic()
             if time.perf_counter() - started > RETRY_DEADLINE_S:
                 raise ProviderError(
                     f"{self.name}: gave up after {RETRY_DEADLINE_S:.0f}s of retries "
@@ -71,13 +91,14 @@ class BaseProvider:
                     r = c.post(url, headers=headers, json=body)
                 if r.status_code in RETRY_STATUS:
                     last = ProviderError(f"{self.name}: HTTP {r.status_code}: {r.text[:200]}")
-                    # A 429 whose body names a quota rather than a rate is not
-                    # going to clear on this timescale; stop after one probe.
-                    if r.status_code == 429 and "quota" in r.text.lower() \
-                            and not r.headers.get("retry-after") and attempt >= 1:
+                    wait = self._retry_delay(r.headers.get("retry-after"), r.text)
+                    if r.status_code == 429 and wait is None and attempt >= 1:
+                        # A 429 that names no wait at all, twice running, is an
+                        # exhausted allowance rather than a passing rate limit.
                         raise ProviderError(
-                            f"{self.name}: quota exhausted, not retrying: {r.text[:180]}")
-                    self._sleep(attempt, r.headers.get("retry-after"))
+                            f"{self.name}: quota exhausted with no retry window, "
+                            f"not retrying: {r.text[:160]}")
+                    self._sleep(attempt, wait)
                     continue
                 if r.status_code >= 400:
                     # 400/401/403/404 are our bug or a bad key: retrying cannot help.
@@ -95,13 +116,25 @@ class BaseProvider:
         raise ProviderError(f"{self.name}: failed after {MAX_ATTEMPTS} attempts: {last}")
 
     @staticmethod
-    def _sleep(attempt: int, retry_after: str | None) -> None:
-        if retry_after:
+    def _retry_delay(header: str | None, body: str) -> float | None:
+        """Seconds the provider asked us to wait, from wherever it put it."""
+        if header:
             try:
-                time.sleep(min(float(retry_after), 60.0))
-                return
+                return float(header)
             except ValueError:
                 pass
+        for pat in (_RETRY_DELAY, _RETRY_IN):
+            if m := pat.search(body or ""):
+                return float(m.group(1))
+        return None
+
+    @staticmethod
+    def _sleep(attempt: int, retry_after: float | None) -> None:
+        if retry_after is not None:
+            # Add a small margin: waking exactly on the boundary tends to race
+            # the refill and burn another attempt.
+            time.sleep(min(retry_after + 1.0, 90.0))
+            return
         # Full jitter, capped at a minute: free-tier buckets refill per minute,
         # so a ceiling below that guarantees the retry lands in the same
         # exhausted window and burns an attempt for nothing.
@@ -204,6 +237,8 @@ class Anthropic(BaseProvider):
 class Gemini(BaseProvider):
     name = "gemini"
     env_key = "GEMINI_API_KEY"
+    # Free tier allows 5 requests/minute on this model, so pace at 13s.
+    min_interval_s = 13.0
     # Pinned, never an alias: `gemini-flash-latest` silently changes model
     # underneath a recorded cache, which would break replay reproducibility.
     # Note ListModels advertises models that generateContent then refuses for

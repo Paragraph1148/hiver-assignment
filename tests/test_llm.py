@@ -141,3 +141,22 @@ def test_retry_deadline_is_bounded():
     from hiver.llm.providers import MAX_ATTEMPTS, RETRY_DEADLINE_S
     assert 0 < RETRY_DEADLINE_S <= 300
     assert MAX_ATTEMPTS >= 3
+
+
+@pytest.mark.parametrize("header,body,expect", [
+    ("30", "", 30.0),
+    (None, 'error: "retryDelay": "35.7s"', 35.7),
+    (None, "Please retry in 35.702626951s.", 35.702626951),
+    (None, "no wait mentioned anywhere", None),
+    ("not-a-number", "Please retry in 12s.", 12.0),
+])
+def test_retry_delay_is_found_wherever_the_provider_puts_it(header, body, expect):
+    """Gemini sends no retry-after header and writes the wait into the body.
+    Missing it means backing off out of phase with the refill window."""
+    from hiver.llm.providers import BaseProvider
+    assert BaseProvider._retry_delay(header, body) == expect
+
+
+def test_gemini_paces_itself_under_the_free_tier_limit():
+    from hiver.llm.providers import Gemini
+    assert Gemini.min_interval_s >= 12.0     # 5 requests/minute
