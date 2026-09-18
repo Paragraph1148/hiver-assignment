@@ -20,6 +20,9 @@ from hiver.route import AlwaysAuto, IntentPriorRouter, LlmRouter  # noqa: E402
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--provider", default="groq")
+    ap.add_argument("--stage", default="both", choices=["route", "draft", "both"],
+                    help="stages run separately so they can use different "
+                         "providers concurrently - separate quotas, no contention")
     args = ap.parse_args()
 
     g = pd.read_parquet("data/golden/golden.parquet")
@@ -34,6 +37,7 @@ def main() -> int:
     intent_ix = build_index("intent")
     print(f"draft index {len(draft_ix):,} | intent index {len(intent_ix):,}", flush=True)
 
+    part = Path(f"data/results/_part_{args.stage}.parquet")
     out = pd.DataFrame({"item_id": g.item_id, "customer_text": g.customer_text,
                         "reply_text": g.reply_text, "gold_intent": g.intent,
                         "gold_route": g.route, "gold_reason": g.reason,
@@ -42,42 +46,46 @@ def main() -> int:
 
     # --- routing -----------------------------------------------------------
     esc = (g.route == "escalate").to_numpy()
-    out["route_always_auto"] = ["auto"] * len(g)
-    prior = IntentPriorRouter().fit(g.intent, esc)
-    loo = prior.predict_loo(pred_intent, esc)
-    out["route_prior"] = ["escalate" if r.escalate else "auto" for r in loo]
-    out["route_prior_risk"] = [r.risk for r in loo]
+    if args.stage in ("route", "both"):
+        out["route_always_auto"] = ["auto"] * len(g)
+        prior = IntentPriorRouter().fit(g.intent, esc)
+        loo = prior.predict_loo(pred_intent, esc)
+        out["route_prior"] = ["escalate" if r.escalate else "auto" for r in loo]
+        out["route_prior_risk"] = [r.risk for r in loo]
 
-    llm = LLM(provider=args.provider)
-    router = LlmRouter(llm, index=intent_ix)
-    print(f"routing {len(texts)} items on {llm.provider_name}/{llm.model} ...", flush=True)
-    t0 = time.time()
-    routes = router.predict(texts, vectors=vecs, intents=pred_intent, progress=True)
-    out["route_llm"] = ["escalate" if r.escalate else "auto" for r in routes]
-    out["route_llm_reason"] = [r.reason for r in routes]
-    out["route_llm_risk"] = [r.risk for r in routes]
-    out["route_llm_why"] = [r.rationale for r in routes]
-    print(f"  routing done {time.time()-t0:.0f}s | hits {llm.cache.stats.hits} "
-          f"misses {llm.cache.stats.misses}", flush=True)
+        llm = LLM(provider=args.provider)
+        router = LlmRouter(llm, index=intent_ix)
+        print(f"routing {len(texts)} on {llm.provider_name}/{llm.model} ...", flush=True)
+        t0 = time.time()
+        routes = router.predict(texts, vectors=vecs, intents=pred_intent, progress=True)
+        out["route_llm"] = ["escalate" if r.escalate else "auto" for r in routes]
+        out["route_llm_reason"] = [r.reason for r in routes]
+        out["route_llm_risk"] = [r.risk for r in routes]
+        out["route_llm_why"] = [r.rationale for r in routes]
+        print(f"  routing done {time.time()-t0:.0f}s | hits {llm.cache.stats.hits} "
+              f"misses {llm.cache.stats.misses}", flush=True)
 
     # --- drafting ----------------------------------------------------------
-    out["draft_canned"] = [d.text for d in CannedReply().draft(texts, vecs)]
-    nearest = NearestReply(draft_ix).draft(texts, vecs)
-    out["draft_nearest"] = [d.text for d in nearest]
+    if args.stage in ("draft", "both"):
+        out["draft_canned"] = [d.text for d in CannedReply().draft(texts, vecs)]
+        nearest = NearestReply(draft_ix).draft(texts, vecs)
+        out["draft_nearest"] = [d.text for d in nearest]
 
-    rag = RagDrafter(llm, draft_ix)
-    print(f"drafting {len(texts)} replies ...", flush=True)
-    t0 = time.time()
-    drafts = rag.draft(texts, vectors=vecs, intents=pred_intent, progress=True)
-    out["draft_rag"] = [d.text for d in drafts]
-    out["draft_rag_failed"] = [d.failed for d in drafts]
-    out["precedents"] = [" ||| ".join(h.reply_text for h in d.precedents[:4]) for d in drafts]
-    n_fail = sum(d.failed for d in drafts)
-    print(f"  drafting done {time.time()-t0:.0f}s | failed {n_fail}", flush=True)
+        llm = LLM(provider=args.provider)
+        rag = RagDrafter(llm, draft_ix)
+        print(f"drafting {len(texts)} on {llm.provider_name}/{llm.model} ...", flush=True)
+        t0 = time.time()
+        drafts = rag.draft(texts, vectors=vecs, intents=pred_intent, progress=True)
+        out["draft_rag"] = [d.text for d in drafts]
+        out["draft_rag_failed"] = [d.failed for d in drafts]
+        out["precedents"] = [" ||| ".join(h.reply_text for h in d.precedents[:4])
+                             for d in drafts]
+        n_fail = sum(d.failed for d in drafts)
+        print(f"  drafting done {time.time()-t0:.0f}s | failed {n_fail}", flush=True)
 
     Path("data/results").mkdir(parents=True, exist_ok=True)
-    out.to_parquet("data/results/reply_route.parquet", index=False)
-    print("\nwrote data/results/reply_route.parquet")
+    out.to_parquet(part, index=False)
+    print(f"\nwrote {part}")
     return 0
 
 
