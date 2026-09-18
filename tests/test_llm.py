@@ -133,3 +133,11 @@ def test_provider_autodetect_prefers_configured(monkeypatch):
 ])
 def test_json_extraction_tolerates_padding(raw):
     assert ChatResponse(text=raw, model="M", provider="p").json() == {"a": 1}
+
+
+def test_retry_deadline_is_bounded():
+    """Regression: a run spent 2h45m retrying an exhausted quota. Not every 429
+    is a rate limit that clears, so time spent on one request is capped."""
+    from hiver.llm.providers import MAX_ATTEMPTS, RETRY_DEADLINE_S
+    assert 0 < RETRY_DEADLINE_S <= 300
+    assert MAX_ATTEMPTS >= 3

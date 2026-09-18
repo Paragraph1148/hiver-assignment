@@ -24,6 +24,11 @@ from .base import ChatRequest, ChatResponse, ProviderError
 
 RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
 MAX_ATTEMPTS = 8
+# Hard ceiling on time spent retrying ONE request. Not every 429 is a rate
+# limit that clears: a daily quota exhaustion returns the same status and never
+# clears, and without a deadline the backoff loop will sit on it indefinitely.
+# A run once spent 2h45m retrying an exhausted Gemini quota, producing nothing.
+RETRY_DEADLINE_S = 180.0
 
 
 class BaseProvider:
@@ -57,12 +62,22 @@ class BaseProvider:
         last: Exception | None = None
 
         for attempt in range(MAX_ATTEMPTS):
+            if time.perf_counter() - started > RETRY_DEADLINE_S:
+                raise ProviderError(
+                    f"{self.name}: gave up after {RETRY_DEADLINE_S:.0f}s of retries "
+                    f"(likely an exhausted quota rather than a passing rate limit): {last}")
             try:
                 with httpx.Client(timeout=self.timeout) as c:
                     r = c.post(url, headers=headers, json=body)
                 if r.status_code in RETRY_STATUS:
-                    self._sleep(attempt, r.headers.get("retry-after"))
                     last = ProviderError(f"{self.name}: HTTP {r.status_code}: {r.text[:200]}")
+                    # A 429 whose body names a quota rather than a rate is not
+                    # going to clear on this timescale; stop after one probe.
+                    if r.status_code == 429 and "quota" in r.text.lower() \
+                            and not r.headers.get("retry-after") and attempt >= 1:
+                        raise ProviderError(
+                            f"{self.name}: quota exhausted, not retrying: {r.text[:180]}")
+                    self._sleep(attempt, r.headers.get("retry-after"))
                     continue
                 if r.status_code >= 400:
                     # 400/401/403/404 are our bug or a bad key: retrying cannot help.
@@ -194,7 +209,7 @@ class Gemini(BaseProvider):
     # Note ListModels advertises models that generateContent then refuses for
     # new accounts (2.5-flash is one), so this was chosen by probing, not by
     # reading the model list.
-    default_model = "gemini-3.8-flash"
+    default_model = "gemini-3.6-flash"
 
     def default_base_url(self) -> str:
         return "https://generativelanguage.googleapis.com/v1beta"
