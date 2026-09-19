@@ -34,19 +34,28 @@ SYSTEMS = [("draft_canned", "trivial: canned deflection"),
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--provider", default="gemini", help="judge provider (cross-family)")
+    # Cross-family separation is about the MODEL FAMILY, not the vendor hosting
+    # it. Groq serves both OpenAI's gpt-oss (the generator) and Alibaba's Qwen,
+    # so judging with Qwen keeps the generator and judge in different families
+    # while staying inside one provider's quota - which is what actually made
+    # this runnable after Gemini's daily allowance ran out mid-evaluation.
+    ap.add_argument("--provider", default="groq", help="judge provider")
+    ap.add_argument("--judge-model", default="qwen/qwen3.8-27b",
+                    help="must be a different family from the generator")
     ap.add_argument("--limit", type=int, default=0, help="0 = all items")
     ap.add_argument("--pairwise", type=int, default=60, help="items for A/B vs nearest")
     args = ap.parse_args()
 
-    d = pd.read_parquet("data/results/reply_route.parquet")
+    d = pd.read_parquet("data/results/_part_draft.parquet")
+    d = d[~d.draft_rag_failed].reset_index(drop=True)
     if args.limit:
         d = d.sample(args.limit, random_state=11).reset_index(drop=True)
     print(f"judging {len(d)} items x {len(SYSTEMS)} systems", flush=True)
 
-    llm = LLM(provider=args.provider)
+    llm = LLM(provider=args.provider, model=args.judge_model)
     judge = ReplyJudge(llm)
-    print(f"judge: {llm.provider_name}/{llm.model}", flush=True)
+    print(f"judge: {llm.provider_name}/{llm.model}  (generator was "
+          f"openai/gpt-oss-120b - different family)", flush=True)
 
     rows = []
     for key, name in SYSTEMS:
