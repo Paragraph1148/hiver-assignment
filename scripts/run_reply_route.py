@@ -1,5 +1,6 @@
 """Run reply drafting and escalation routing over the golden set."""
 import argparse
+import json
 import sys
 import time
 import warnings
@@ -20,6 +21,10 @@ from hiver.route import AlwaysAuto, IntentPriorRouter, LlmRouter  # noqa: E402
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--provider", default="groq")
+    ap.add_argument("--subset", action="store_true",
+                    help="restrict to the fixed judged subset (drafting only; "
+                         "judging costs 4 calls per item and is the binding "
+                         "constraint on a free tier)")
     ap.add_argument("--stage", default="both", choices=["route", "draft", "both"],
                     help="stages run separately so they can use different "
                          "providers concurrently - separate quotas, no contention")
@@ -27,6 +32,10 @@ def main() -> int:
 
     g = pd.read_parquet("data/golden/golden.parquet")
     g = g[g.complete].reset_index(drop=True)
+    if args.subset:
+        keep = set(json.loads(Path("data/golden/judge_subset.json").read_text())["item_ids"])
+        g = g[g.item_id.isin(keep)].reset_index(drop=True)
+        print(f"restricted to the judged subset: {len(g)} items", flush=True)
     texts = g.customer_text.tolist()
     vecs = embed(texts, show_progress=False)
 
