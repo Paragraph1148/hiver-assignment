@@ -57,8 +57,21 @@ def main() -> int:
     print(f"judge: {llm.provider_name}/{llm.model}  (generator was "
           f"openai/gpt-oss-120b - different family)", flush=True)
 
+    # Checkpoint after each system. Container restarts have repeatedly killed
+    # long runs; the response cache already makes the CALLS resumable, and this
+    # makes the scored rows survive too, so a partial run is still analysable.
+    ckpt = Path("data/results/judge_scores.parquet")
     rows = []
+    if ckpt.exists():
+        prev = pd.read_parquet(ckpt)
+        rows = prev.to_dict("records")
+        done = set(prev.system.unique())
+        print(f"  resuming: {len(rows)} rows already scored for {sorted(done)}", flush=True)
+
     for key, name in SYSTEMS:
+        if any(r.get("system") == key for r in rows):
+            print(f"  {name:<34} already scored, skipping", flush=True)
+            continue
         t0 = time.time()
         n_fail = 0
         for i, r in enumerate(d.itertuples()):
@@ -72,6 +85,7 @@ def main() -> int:
             if (i + 1) % 50 == 0:
                 print(f"    {name}: {i+1}/{len(d)}", flush=True)
         print(f"  {name:<34} {time.time()-t0:>6.0f}s  failed {n_fail}", flush=True)
+        pd.DataFrame(rows).to_parquet(ckpt, index=False)
 
     s = pd.DataFrame(rows)
     s.to_parquet("data/results/judge_scores.parquet", index=False)
