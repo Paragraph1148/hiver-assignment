@@ -1,0 +1,16 @@
+{
+  "n": 120,
+  "means": {
+    "draft_canned": 3.525,
+    "draft_nearest": 4.00625,
+    "draft_rag": 4.46875,
+    "reply_text": 3.915909090909091
+  },
+  "brand_weak_share": 0.21818181818181817,
+  "pairwise": {
+    "a": 26,
+    "b": 7,
+    "tie": 7
+  },
+  "position_flips": 6
+}
